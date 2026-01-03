@@ -19,7 +19,6 @@
             --color-light: #f0fdfa;
             --color-bg: #f3f4f6;
             --safe-bottom: env(safe-area-inset-bottom, 20px);
-            --safe-top: env(safe-area-inset-top, 20px);
         }
 
         body {
@@ -33,7 +32,6 @@
             height: 100%;
         }
 
-        /* Utilities */
         .text-theme { color: var(--color-main); }
         .bg-theme { background-color: var(--color-main); }
         .bg-theme-light { background-color: var(--color-light); }
@@ -41,9 +39,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .pb-safe { padding-bottom: var(--safe-bottom); }
-        .pt-safe { padding-top: var(--safe-top); }
 
-        /* Timeline Graphics */
         .timeline-line {
             position: absolute;
             left: 19px;
@@ -54,35 +50,6 @@
             z-index: 0;
         }
 
-        /* Live Indicator Animation */
-        .live-indicator-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #ef4444; /* Red */
-            border-radius: 50%;
-            position: absolute;
-            top: 0;
-            right: 0;
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            animation: pulse-red 1.5s infinite;
-        }
-        
-        .live-text {
-            animation: text-pulse 2s infinite;
-        }
-
-        @keyframes pulse-red {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        
-        @keyframes text-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        /* Swipe Actions */
         .swipe-item-container {
             position: relative;
             overflow: hidden;
@@ -106,8 +73,22 @@
             border-radius: 0.75rem;
         }
         
-        /* Modal Scroll Fix */
-        .modal-body-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .modal-body-scroll {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 6.0 New Feature: Active Item Pulse */
+        @keyframes pulse-border {
+            0% { border-color: var(--color-main); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
+            70% { border-color: var(--color-main); box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
+            100% { border-color: var(--color-main); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+        }
+        .active-item-card {
+            border-left: 4px solid var(--color-main) !important;
+            animation: pulse-border 2s infinite;
+        }
     </style>
 </head>
 <body>
@@ -117,7 +98,7 @@
         
         <!-- ==================== VIEW: HOME ==================== -->
         <div id="view-home" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-gray-50 z-10 transition-transform duration-300">
-            <header class="bg-white p-4 pt-safe shadow-sm z-20 flex justify-between items-center shrink-0">
+            <header class="bg-white p-4 shadow-sm z-20 flex justify-between items-center shrink-0">
                 <div>
                     <h1 class="text-2xl font-bold text-theme flex items-center gap-2">
                         <i data-lucide="plane" class="w-6 h-6"></i> TravelFlow
@@ -130,7 +111,7 @@
             </header>
             
             <div class="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-2xl mx-auto" id="trip-list-container">
-                <!-- Trip cards -->
+                <!-- Trip cards injected here -->
             </div>
 
             <div class="p-4 bg-white border-t border-gray-100 shrink-0 pb-safe">
@@ -143,7 +124,7 @@
         <!-- ==================== VIEW: DETAIL ==================== -->
         <div id="view-detail" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-white z-20 translate-x-full transition-transform duration-300">
             <!-- Header -->
-            <header class="bg-theme text-white p-3 pt-safe shadow-md z-30 shrink-0">
+            <header class="bg-theme text-white p-3 shadow-md z-30 shrink-0">
                 <div class="flex items-center justify-between mb-2">
                     <button onclick="goBack()" class="p-2 -ml-1 rounded-full active:bg-white/20 transition">
                         <i data-lucide="arrow-left" class="w-6 h-6"></i>
@@ -159,66 +140,62 @@
                 <!-- Tabs -->
                 <div class="flex bg-black/10 rounded-lg p-1 max-w-md mx-auto w-full">
                     <button onclick="switchTab('itinerary')" id="tab-itinerary" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition">行程</button>
-                    <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">購買清單</button>
+                    <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">記帳 & 購物</button>
                 </div>
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-hidden relative w-full max-w-3xl mx-auto flex flex-col">
+            <div class="flex-1 overflow-hidden relative w-full max-w-3xl mx-auto">
                 
                 <!-- Tab: Itinerary -->
-                <div id="content-itinerary" class="absolute inset-0 flex flex-col bg-gray-50">
-                    <!-- Day Selector (Sticky) -->
-                    <div class="bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100 shrink-0">
+                <div id="content-itinerary" class="absolute inset-0 overflow-y-auto bg-gray-50 pb-20 scroll-smooth">
+                    <!-- Day Selector -->
+                    <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100">
                         <div class="flex overflow-x-auto no-scrollbar p-2 gap-2" id="day-selector">
-                            <!-- Days -->
+                            <!-- Days injected here -->
                         </div>
                     </div>
 
-                    <!-- Scrollable Timeline -->
-                    <div class="flex-1 overflow-y-auto pb-24 scroll-smooth" id="itinerary-scroll-area">
-                        <div id="pdf-target" class="min-h-full">
-                            <div id="timeline-container" class="p-4 relative min-h-[300px]">
-                                <!-- Timeline Items -->
-                            </div>
-                        </div>
-                        <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                            <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
-                            <p class="text-sm">尚未新增行程</p>
+                    <!-- PDF Target -->
+                    <div id="pdf-target" class="bg-gray-50 min-h-full">
+                        <div id="timeline-container" class="p-4 relative min-h-[300px]">
+                            <!-- Timeline items injected here -->
                         </div>
                     </div>
-                    
-                    <!-- FAB (Inside Itinerary) -->
-                    <div class="absolute bottom-6 right-6 z-40 pb-safe">
-                        <button onclick="openAddItemModal()" class="bg-theme text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition active:scale-90 active:rotate-90">
-                            <i data-lucide="plus" class="w-8 h-8"></i>
-                        </button>
+
+                    <!-- Empty State -->
+                    <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                        <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
+                        <p class="text-sm">尚未新增行程</p>
                     </div>
                 </div>
 
-                <!-- Tab: Shopping (Fixed Layout) -->
-                <div id="content-shopping" class="absolute inset-0 flex flex-col bg-gray-50 hidden">
-                    <!-- Fixed Header Input -->
-                    <div class="p-4 bg-white border-b border-gray-100 shadow-sm shrink-0 z-20">
-                        <div class="flex gap-2 w-full">
-                            <input type="text" id="new-shop-item" placeholder="輸入要買的物品..." class="flex-1 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 border-theme shadow-sm bg-gray-50">
-                            <button onclick="addShopItem()" class="bg-theme text-white w-12 rounded-xl shadow-sm font-bold text-xl active:scale-95 transition flex items-center justify-center">
-                                <i data-lucide="plus" class="w-6 h-6"></i>
-                            </button>
-                        </div>
+                <!-- Tab: Shopping (Bookkeeping) -->
+                <div id="content-shopping" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20">
+                    <div class="bg-yellow-50 text-yellow-700 text-xs p-3 rounded-xl mb-4 flex items-start gap-2 border border-yellow-100">
+                        <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                        <p>勾選物品後，可輸入實際購買金額進行記帳。總花費將自動更新。</p>
                     </div>
-                    
-                    <!-- Scrollable List -->
-                    <div id="shopping-list-scroll" class="flex-1 overflow-y-auto p-4 pb-safe space-y-3">
-                        <div id="shopping-list">
-                            <!-- Items -->
-                        </div>
-                        <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                            <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 opacity-30"></i>
-                            <p class="text-sm">購買清單是空的</p>
-                        </div>
+
+                    <div class="mb-4 flex gap-2">
+                        <input type="text" id="new-shop-item" placeholder="輸入物品名稱..." class="flex-1 p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 border-theme shadow-sm">
+                        <button onclick="addShopItem()" class="bg-theme text-white px-4 rounded-lg shadow-sm font-bold text-xl">+</button>
+                    </div>
+                    <div id="shopping-list" class="space-y-3">
+                        <!-- Shopping items -->
+                    </div>
+                    <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                        <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 opacity-30"></i>
+                        <p class="text-sm">清單是空的</p>
                     </div>
                 </div>
+            </div>
+
+            <!-- Floating Action Button -->
+            <div id="fab-container" class="absolute bottom-6 right-6 z-40 pb-safe">
+                <button onclick="openAddItemModal()" class="bg-theme text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition active:scale-90 active:rotate-90">
+                    <i data-lucide="plus" class="w-8 h-8"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -227,7 +204,7 @@
     
     <!-- Modal: Settings -->
     <div id="modal-settings" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl animate-pop">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl">
             <h3 class="text-lg font-bold text-gray-800 mb-4">設定</h3>
             <div class="mb-6">
                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">主題顏色</label>
@@ -268,6 +245,7 @@
                 <h3 id="modal-item-title" class="text-lg font-bold text-gray-800">行程細節</h3>
                 <button onclick="closeModal('modal-item')" class="p-1 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
             </div>
+            
             <div class="p-5 modal-body-scroll space-y-5">
                 <div class="flex gap-3">
                     <div class="w-1/3">
@@ -285,8 +263,9 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="p-4 border border-gray-100 rounded-2xl relative shadow-sm">
-                    <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">Plan A</span>
+                    <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">主要行程 Plan A</span>
                     <input type="text" id="item-title" placeholder="要做什麼？" class="w-full p-2 mb-2 font-medium text-lg border-b border-gray-100 outline-none placeholder-gray-300">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i>
@@ -294,14 +273,18 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-bold text-gray-400 shrink-0">NT$</span>
-                        <input type="number" id="item-cost" placeholder="費用" class="w-full p-1 text-sm outline-none">
+                        <input type="number" id="item-cost" placeholder="預估費用" class="w-full p-1 text-sm outline-none">
                     </div>
                 </div>
+
                 <div class="border border-dashed border-gray-300 rounded-2xl p-4 bg-gray-50">
-                    <label class="flex items-center gap-2 text-sm font-bold text-gray-600">
-                        <input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded">
-                        啟用備案 (Plan B)
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-600">
+                            <input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded">
+                            啟用備案 (Plan B)
+                        </label>
+                    </div>
+                    
                     <div id="plan-b-inputs" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-200">
                         <input type="text" id="backup-title" placeholder="備案標題..." class="w-full p-2 bg-white rounded-lg text-sm border border-gray-200 shadow-sm">
                         <div class="flex items-center gap-2">
@@ -310,12 +293,14 @@
                         </div>
                     </div>
                 </div>
+
                 <div>
                     <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">備註</label>
                     <textarea id="item-note" rows="3" placeholder="詳細資訊..." class="w-full p-3 bg-gray-50 rounded-xl outline-none resize-none text-sm"></textarea>
                 </div>
                 <div class="h-4"></div>
             </div>
+
             <div class="p-4 border-t border-gray-100 bg-white pb-safe shrink-0">
                 <button onclick="saveItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">儲存行程</button>
             </div>
@@ -323,7 +308,7 @@
     </div>
 
     <script>
-        // --- Configuration ---
+        // --- Init & Config ---
         const THEMES = {
             teal: { main: '#0d9488', light: '#f0fdfa' },
             rose: { main: '#e11d48', light: '#fff1f2' },
@@ -336,7 +321,7 @@
         let currentDayIndex = 0;
         let tempDaysCount = 3;
         let editingItemId = null;
-        let liveInterval = null;
+        let liveTrackerInterval = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(appSettings.theme);
@@ -345,6 +330,7 @@
             document.getElementById('input-trip-date').valueAsDate = new Date();
         });
 
+        // --- Theme ---
         function applyTheme(themeName) {
             const theme = THEMES[themeName] || THEMES.teal;
             const root = document.documentElement;
@@ -356,125 +342,88 @@
         function setTheme(name) { applyTheme(name); renderHome(); if(currentTripId) renderTimeline(); }
         function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // --- Helpers ---
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
         function saveData() { localStorage.setItem('travelFlow_trips_v6', JSON.stringify(trips)); }
         function getTrip(id) { return trips.find(t => t.id === id); }
+        
         function getDayName(dateStr, addDays) {
             const date = new Date(dateStr);
             date.setDate(date.getDate() + addDays);
             const days = ['日', '一', '二', '三', '四', '五', '六'];
             return days[date.getDay()];
         }
+
+        // New Cost Calculation: Plan A cost + Checked Shopping items cost
         function calculateTotalCost(trip) {
             let total = 0;
-            if (trip.days) trip.days.forEach(day => day.items.forEach(item => total += parseInt(item.cost) || 0));
-            return total;
-        }
-
-        // --- Live Tracking Logic ---
-        function startLiveTracking() {
-            if (liveInterval) clearInterval(liveInterval);
-            updateLiveIndicator(); // Initial run
-            liveInterval = setInterval(updateLiveIndicator, 60000); // Check every minute
-        }
-
-        function stopLiveTracking() {
-            if (liveInterval) clearInterval(liveInterval);
-        }
-
-        function updateLiveIndicator() {
-            if (!currentTripId) return;
-            const trip = getTrip(currentTripId);
-            
-            // 1. Check if "Current Day Index" matches "Today's Date"
-            const tripStartDate = new Date(trip.startDate);
-            const viewingDate = new Date(tripStartDate);
-            viewingDate.setDate(tripStartDate.getDate() + currentDayIndex);
-            
-            const now = new Date();
-            const isSameDay = viewingDate.getDate() === now.getDate() && 
-                              viewingDate.getMonth() === now.getMonth() && 
-                              viewingDate.getFullYear() === now.getFullYear();
-
-            // Clear existing indicators
-            document.querySelectorAll('.live-indicator-dot, .live-text').forEach(el => el.remove());
-
-            if (!isSameDay) return; // Not today, don't show indicators
-
-            // 2. Find Current Item based on Time
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-            const currentTimeVal = currentHours * 60 + currentMinutes;
-
-            const items = trip.days[currentDayIndex].items;
-            // Assumes items are sorted by renderTimeline
-            
-            let activeItemId = null;
-            
-            // Logic: Find the last item that started (time <= now)
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                const [h, m] = item.time.split(':').map(Number);
-                const itemTimeVal = h * 60 + m;
-
-                if (itemTimeVal <= currentTimeVal) {
-                    activeItemId = item.id; // This started in the past/now
-                } else {
-                    break; // Future item
-                }
+            // 1. Itinerary Costs
+            if (trip.days) {
+                trip.days.forEach(day => {
+                    day.items.forEach(item => { total += parseInt(item.cost) || 0; });
+                });
             }
-
-            // If no item started yet (early morning), maybe highlight the first one?
-            // Let's stick to "active or most recent". If activeItemId is null, means we are before first event.
-            // Option: Highlight first event as "Up Next"? Let's just highlight active.
-            
-            if (activeItemId) {
-                const itemEl = document.getElementById(`item-wrapper-${activeItemId}`);
-                if (itemEl) {
-                    // Inject Indicator
-                    const indicator = document.createElement('div');
-                    indicator.className = 'live-indicator-dot';
-                    // Find the time element to attach near, or just attach to the wrapper
-                    // Let's attach to the time badge inside
-                    const timeBadge = itemEl.querySelector('.time-badge');
-                    if (timeBadge) {
-                        timeBadge.style.position = 'relative';
-                        timeBadge.appendChild(indicator);
-                        
-                        // Optional text
-                        const text = document.createElement('span');
-                        text.className = 'live-text text-[10px] text-red-500 font-bold ml-1';
-                        text.innerText = 'NOW';
-                        timeBadge.parentNode.appendChild(text);
+            // 2. Shopping Costs (Bookkeeping)
+            if (trip.shoppingList) {
+                trip.shoppingList.forEach(item => {
+                    if (item.checked && item.price) {
+                        total += parseInt(item.price) || 0;
                     }
-                }
+                });
             }
+            return total;
         }
 
         // --- Views ---
         function openTrip(id) {
             currentTripId = id;
-            currentDayIndex = 0;
-            switchTab('itinerary');
             const trip = getTrip(id);
+            
+            // 6.0 Feature: Auto-detect today
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const start = new Date(trip.startDate);
+            start.setHours(0,0,0,0);
+            
+            // Calculate day difference
+            const diffTime = Math.abs(today - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            
+            if (today >= start && diffDays <= trip.days.length) {
+                // Determine index (0-based) based on date math roughly
+                // A more robust way:
+                const dayMs = 1000 * 60 * 60 * 24;
+                const index = Math.round((today - start) / dayMs);
+                if (index >= 0 && index < trip.days.length) {
+                    currentDayIndex = index;
+                } else {
+                    currentDayIndex = 0;
+                }
+            } else {
+                currentDayIndex = 0;
+            }
+
+            switchTab('itinerary');
             document.getElementById('detail-title').innerText = trip.title;
             updateCostDisplay();
             document.getElementById('view-detail').classList.remove('translate-x-full');
             renderDays();
             renderTimeline();
             renderShopping();
-            startLiveTracking(); // Start monitoring
+            startLiveTracking(); // Start tracking time
         }
 
         function goBack() {
-            stopLiveTracking();
             document.getElementById('view-detail').classList.add('translate-x-full');
+            stopLiveTracking();
             setTimeout(() => { currentTripId = null; renderHome(); }, 300);
         }
 
         function switchTab(tab) {
             const itineraryContent = document.getElementById('content-itinerary');
             const shoppingContent = document.getElementById('content-shopping');
+            const fab = document.getElementById('fab-container');
             const btnItinerary = document.getElementById('tab-itinerary');
             const btnShopping = document.getElementById('tab-shopping');
             
@@ -483,17 +432,106 @@
                 btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
                 itineraryContent.classList.remove('hidden');
                 shoppingContent.classList.add('hidden');
+                fab.classList.remove('hidden');
+                startLiveTracking(); // Ensure tracking is on
+                scrollToActiveItem();
             } else {
                 btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
                 btnItinerary.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
                 shoppingContent.classList.remove('hidden');
                 itineraryContent.classList.add('hidden');
+                fab.classList.add('hidden');
+                stopLiveTracking(); // Stop tracking when shopping
             }
         }
+
         function updateCostDisplay() {
             const trip = getTrip(currentTripId);
             const total = calculateTotalCost(trip);
             document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`;
+        }
+
+        // --- Live Tracking Logic (v6.0) ---
+        function startLiveTracking() {
+            if (liveTrackerInterval) clearInterval(liveTrackerInterval);
+            updateLiveStatus(); // Run immediately
+            liveTrackerInterval = setInterval(updateLiveStatus, 60000); // Check every minute
+        }
+        function stopLiveTracking() {
+            if (liveTrackerInterval) clearInterval(liveTrackerInterval);
+            // Remove active classes
+            document.querySelectorAll('.active-item-card').forEach(el => el.classList.remove('active-item-card'));
+        }
+
+        function updateLiveStatus() {
+            const trip = getTrip(currentTripId);
+            if (!trip) return;
+
+            // Check if current view Day matches Today
+            const today = new Date();
+            const start = new Date(trip.startDate);
+            start.setHours(0,0,0,0);
+            
+            // Calculate date of current view index
+            const viewDate = new Date(start);
+            viewDate.setDate(viewDate.getDate() + currentDayIndex);
+            
+            // Compare YYYY-MM-DD
+            if (viewDate.toDateString() !== today.toDateString()) {
+                // Not today's schedule, remove highlight
+                document.querySelectorAll('.active-item-card').forEach(el => el.classList.remove('active-item-card'));
+                return;
+            }
+
+            const nowTime = today.getHours() * 60 + today.getMinutes();
+            const items = trip.days[currentDayIndex].items;
+            let activeItemId = null;
+            let minDiff = Infinity;
+
+            // Find the item that is current (time <= now) but closest to now
+            // OR the immediate next item if nothing is "current" yet (early morning)
+            
+            // Convert items to minutes
+            const sortedItems = items.map(i => {
+                const [h, m] = i.time.split(':').map(Number);
+                return { ...i, mins: h * 60 + m };
+            }).sort((a, b) => a.mins - b.mins);
+
+            // Logic: Highlight the event that started most recently
+            for (let i = 0; i < sortedItems.length; i++) {
+                if (sortedItems[i].mins <= nowTime) {
+                    activeItemId = sortedItems[i].id; // Keep updating as we find later events that started
+                } else {
+                    // This event is in future. 
+                    // If no event has started yet (activeItemId is null), maybe highlight first upcoming?
+                    // Let's stick to "Current Active" for strict tracking.
+                    break;
+                }
+            }
+            
+            // If nothing started yet, highlight first item? No, user said "if no then don't show"
+            // But let's highlight if it's within 30 mins before start?
+            if (!activeItemId && sortedItems.length > 0) {
+                 if (sortedItems[0].mins - nowTime <= 60 && sortedItems[0].mins > nowTime) {
+                     activeItemId = sortedItems[0].id; // Upcoming within hour
+                 }
+            }
+
+            // Apply Visuals
+            document.querySelectorAll('.active-item-card').forEach(el => el.classList.remove('active-item-card'));
+            if (activeItemId) {
+                const el = document.getElementById(`card-${activeItemId}`);
+                if (el) el.classList.add('active-item-card');
+            }
+        }
+
+        function scrollToActiveItem() {
+            setTimeout(() => {
+                const active = document.querySelector('.active-item-card');
+                if (active) {
+                    active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300); // Wait for render
         }
 
         // --- Home ---
@@ -536,15 +574,13 @@
             const trip = getTrip(currentTripId);
             const container = document.getElementById('timeline-container');
             const emptyState = document.getElementById('timeline-empty');
+            
             container.innerHTML = '<div class="timeline-line"></div>';
             const items = trip.days[currentDayIndex].items;
             if (items.length === 0) {
-                emptyState.classList.remove('hidden');
-                container.classList.add('hidden');
-                return;
+                emptyState.classList.remove('hidden'); container.classList.add('hidden'); return;
             }
-            emptyState.classList.add('hidden');
-            container.classList.remove('hidden');
+            emptyState.classList.add('hidden'); container.classList.remove('hidden');
 
             items.sort((a, b) => a.time.localeCompare(b.time));
 
@@ -568,9 +604,9 @@
                             <i data-lucide="${iconName}" class="w-3.5 h-3.5"></i>
                         </div>
                     </div>
-                    <div class="relative" id="item-wrapper-${item.id}">
+                    <div class="relative">
                          <div class="swipe-action-bg rounded-xl"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div>
-                         <div class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4"
+                         <div id="card-${item.id}" class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 transition-all duration-500"
                              onclick="openEditItemModal('${item.id}')"
                              ontouchstart="handleTouchStart(event, this, '${item.id}', 'item')"
                              ontouchmove="handleTouchMove(event, this)"
@@ -578,9 +614,7 @@
                             
                             <!-- Plan A -->
                             <div class="flex-1 min-w-[150px]">
-                                <div class="flex items-center gap-1 mb-1">
-                                    <span class="time-badge text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>
-                                </div>
+                                <span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block mb-1">${item.time}</span>
                                 <h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>
                                 ${item.location ? `
                                 <a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="inline-flex items-center text-xs text-gray-500 hover:text-theme gap-1 bg-gray-50 px-2 py-1 rounded transition max-w-full truncate">
@@ -605,15 +639,11 @@
                 container.appendChild(el);
             });
             lucide.createIcons();
-            
-            // Run live check immediately after render
-            updateLiveIndicator();
+            updateLiveStatus(); // Apply highlight immediately
         }
 
-        // --- Swipe ---
-        let touchStartX = 0;
-        let touchCurrentX = 0;
-        let isSwiping = false;
+        // --- Swipe Logic ---
+        let touchStartX = 0; let touchCurrentX = 0; let isSwiping = false;
         function handleTouchStart(e, el) { touchStartX = e.touches[0].clientX; el.style.transition = 'none'; }
         function handleTouchMove(e, el) {
             touchCurrentX = e.touches[0].clientX;
@@ -634,7 +664,84 @@
             isSwiping = false; touchStartX = 0; touchCurrentX = 0;
         }
 
-        // --- CRUD ---
+        // --- Shopping & Bookkeeping (v6.0) ---
+        function renderShopping() {
+            const trip = getTrip(currentTripId);
+            const container = document.getElementById('shopping-list');
+            const emptyState = document.getElementById('shopping-empty');
+            container.innerHTML = '';
+            if (!trip.shoppingList || trip.shoppingList.length === 0) {
+                emptyState.classList.remove('hidden'); return;
+            }
+            emptyState.classList.add('hidden');
+            trip.shoppingList.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'swipe-item-container rounded-xl overflow-hidden';
+                
+                // Show Price Input if checked
+                const priceInputHtml = item.checked ? `
+                    <div class="flex items-center border-l border-gray-100 pl-3 ml-2 animate-fade-in">
+                        <span class="text-xs font-bold text-gray-400 mr-1">$</span>
+                        <input type="number" 
+                            value="${item.price || ''}" 
+                            onchange="updateShopPrice('${item.id}', this.value)"
+                            placeholder="金額" 
+                            class="w-16 p-1 text-sm bg-gray-50 rounded border-none focus:ring-1 focus:ring-teal-500 outline-none text-right font-bold text-theme">
+                    </div>
+                ` : '';
+
+                el.innerHTML = `
+                    <div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
+                    <div class="swipe-content bg-white p-3 border border-gray-100 flex items-center justify-between"
+                         ontouchstart="handleTouchStart(event, this, '${item.id}', 'shop')"
+                         ontouchmove="handleTouchMove(event, this)"
+                         ontouchend="handleTouchEnd(event, this, '${item.id}', 'shop')">
+                        <div class="flex items-center gap-3 flex-1">
+                            <button onclick="toggleShopItem('${item.id}')" class="text-theme flex-shrink-0">
+                                ${item.checked ? '<i data-lucide="check-square" class="w-6 h-6"></i>' : '<i data-lucide="square" class="w-6 h-6 text-gray-300"></i>'}
+                            </button>
+                            <span class="font-medium ${item.checked ? 'text-gray-400 line-through' : 'text-gray-800'} truncate">${item.text}</span>
+                        </div>
+                        ${priceInputHtml}
+                    </div>`;
+                container.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+
+        function addShopItem() {
+            const input = document.getElementById('new-shop-item');
+            if (!input.value.trim()) return;
+            const trip = getTrip(currentTripId);
+            if (!trip.shoppingList) trip.shoppingList = [];
+            trip.shoppingList.push({ id: generateId(), text: input.value.trim(), checked: false, price: 0 });
+            input.value = '';
+            saveData();
+            renderShopping();
+            updateCostDisplay();
+        }
+
+        function toggleShopItem(id) {
+            const trip = getTrip(currentTripId);
+            const item = trip.shoppingList.find(i => i.id === id);
+            if(item) { item.checked = !item.checked; saveData(); renderShopping(); updateCostDisplay(); }
+        }
+
+        function updateShopPrice(id, price) {
+            const trip = getTrip(currentTripId);
+            const item = trip.shoppingList.find(i => i.id === id);
+            if(item) { item.price = price; saveData(); updateCostDisplay(); }
+        }
+
+        function deleteShopItem(id) {
+            const trip = getTrip(currentTripId);
+            trip.shoppingList = trip.shoppingList.filter(i => i.id !== id);
+            saveData();
+            renderShopping();
+            updateCostDisplay();
+        }
+
+        // --- Modals & CRUD ---
         function openAddTripModal() {
             document.getElementById('modal-trip').classList.remove('hidden');
             tempDaysCount = 3;
@@ -653,9 +760,7 @@
             const newTrip = { id: generateId(), title, startDate: date, createdAt: new Date().toISOString(), shoppingList: [], days: [] };
             for(let i=0; i<tempDaysCount; i++) newTrip.days.push({ items: [] });
             trips.push(newTrip);
-            saveData();
-            renderHome();
-            closeModal('modal-trip');
+            saveData(); renderHome(); closeModal('modal-trip');
         }
         function deleteTrip(id) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); }
 
@@ -672,7 +777,6 @@
             document.getElementById('item-location').value = '';
             document.getElementById('item-cost').value = '';
             document.getElementById('item-note').value = '';
-            document.getElementById('item-type').value = 'spot';
             document.getElementById('has-plan-b').checked = false;
             togglePlanBInputs();
             document.getElementById('backup-title').value = '';
@@ -705,25 +809,24 @@
             const hasBackup = document.getElementById('has-plan-b').checked;
             const backupTitle = document.getElementById('backup-title').value.trim();
             const backupLocation = document.getElementById('backup-location').value.trim();
+
             if (!title) return alert('請輸入標題');
+            
             const trip = getTrip(currentTripId);
             const newItem = { id: editingItemId || generateId(), time, title, type, location, cost, note, hasBackup, backupTitle, backupLocation };
+            
             if (editingItemId) {
                 const idx = trip.days[currentDayIndex].items.findIndex(i => i.id === editingItemId);
                 if (idx > -1) trip.days[currentDayIndex].items[idx] = newItem;
             } else { trip.days[currentDayIndex].items.push(newItem); }
-            saveData();
-            closeModal('modal-item');
-            renderTimeline();
-            updateCostDisplay();
+            saveData(); closeModal('modal-item'); renderTimeline(); updateCostDisplay();
         }
         function deleteItem(itemId) {
             const trip = getTrip(currentTripId);
             trip.days[currentDayIndex].items = trip.days[currentDayIndex].items.filter(i => i.id !== itemId);
-            saveData();
-            renderTimeline();
-            updateCostDisplay();
+            saveData(); renderTimeline(); updateCostDisplay();
         }
+
         function renderDays() {
             const trip = getTrip(currentTripId);
             const container = document.getElementById('day-selector');
@@ -733,7 +836,7 @@
                 const isActive = index === currentDayIndex;
                 btn.className = `flex-none flex flex-col items-center justify-center w-12 h-14 rounded-xl transition-all ${isActive ? 'bg-theme text-white shadow-md' : 'bg-gray-100 text-gray-500'}`;
                 btn.innerHTML = `<span class="text-xs font-bold">D${index + 1}</span><span class="text-[10px]">${getDayName(trip.startDate, index)}</span>`;
-                btn.onclick = () => { currentDayIndex = index; renderDays(); renderTimeline(); updateLiveIndicator(); };
+                btn.onclick = () => { currentDayIndex = index; renderDays(); renderTimeline(); startLiveTracking(); };
                 container.appendChild(btn);
             });
             const addBtn = document.createElement('button');
@@ -742,54 +845,7 @@
             addBtn.onclick = () => { trip.days.push({ items: [] }); saveData(); renderDays(); };
             container.appendChild(addBtn);
         }
-        function renderShopping() {
-            const trip = getTrip(currentTripId);
-            const container = document.getElementById('shopping-list');
-            const emptyState = document.getElementById('shopping-empty');
-            container.innerHTML = '';
-            if (!trip.shoppingList || trip.shoppingList.length === 0) {
-                emptyState.classList.remove('hidden'); return;
-            }
-            emptyState.classList.add('hidden');
-            trip.shoppingList.forEach(item => {
-                const el = document.createElement('div');
-                el.className = 'swipe-item-container rounded-xl overflow-hidden';
-                el.innerHTML = `
-                    <div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
-                    <div class="swipe-content bg-white p-3 border border-gray-100 flex items-center gap-3"
-                         ontouchstart="handleTouchStart(event, this, '${item.id}', 'shop')"
-                         ontouchmove="handleTouchMove(event, this)"
-                         ontouchend="handleTouchEnd(event, this, '${item.id}', 'shop')">
-                        <button onclick="toggleShopItem('${item.id}')" class="text-theme">
-                            ${item.checked ? '<i data-lucide="check-square" class="w-6 h-6"></i>' : '<i data-lucide="square" class="w-6 h-6 text-gray-300"></i>'}
-                        </button>
-                        <span class="flex-1 font-medium ${item.checked ? 'text-gray-400 line-through' : 'text-gray-800'}">${item.text}</span>
-                    </div>`;
-                container.appendChild(el);
-            });
-            lucide.createIcons();
-        }
-        function addShopItem() {
-            const input = document.getElementById('new-shop-item');
-            if (!input.value.trim()) return;
-            const trip = getTrip(currentTripId);
-            if (!trip.shoppingList) trip.shoppingList = [];
-            trip.shoppingList.push({ id: generateId(), text: input.value.trim(), checked: false });
-            input.value = '';
-            saveData();
-            renderShopping();
-        }
-        function toggleShopItem(id) {
-            const trip = getTrip(currentTripId);
-            const item = trip.shoppingList.find(i => i.id === id);
-            if(item) { item.checked = !item.checked; saveData(); renderShopping(); }
-        }
-        function deleteShopItem(id) {
-            const trip = getTrip(currentTripId);
-            trip.shoppingList = trip.shoppingList.filter(i => i.id !== id);
-            saveData();
-            renderShopping();
-        }
+
         function exportPDF() {
             const trip = getTrip(currentTripId);
             const element = document.getElementById('pdf-target');

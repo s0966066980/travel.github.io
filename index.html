@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 6.0</title>
+    <title>TravelFlow 7.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -79,7 +79,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* 6.0 New Feature: Active Item Pulse */
+        /* Active Item Pulse */
         @keyframes pulse-border {
             0% { border-color: var(--color-main); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
             70% { border-color: var(--color-main); box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
@@ -89,6 +89,14 @@
             border-left: 4px solid var(--color-main) !important;
             animation: pulse-border 2s infinite;
         }
+
+        /* Weather Badge Animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0px); }
+        }
+        .weather-icon { animation: float 3s ease-in-out infinite; }
     </style>
 </head>
 <body>
@@ -103,11 +111,22 @@
                     <h1 class="text-2xl font-bold text-theme flex items-center gap-2">
                         <i data-lucide="plane" class="w-6 h-6"></i> TravelFlow
                     </h1>
-                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v6.0)</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v7.0)</p>
                 </div>
-                <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100">
-                    <i data-lucide="settings" class="w-6 h-6"></i>
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- Current Location Weather -->
+                    <div id="current-weather-badge" class="hidden flex flex-col items-end mr-1">
+                        <div class="flex items-center gap-1 text-gray-600">
+                            <i id="current-weather-icon" data-lucide="cloud" class="w-4 h-4 weather-icon"></i>
+                            <span id="current-temp" class="text-sm font-bold">--°C</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400">目前位置</span>
+                    </div>
+
+                    <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100">
+                        <i data-lucide="settings" class="w-6 h-6"></i>
+                    </button>
+                </div>
             </header>
             
             <div class="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-2xl mx-auto" id="trip-list-container">
@@ -124,31 +143,38 @@
         <!-- ==================== VIEW: DETAIL ==================== -->
         <div id="view-detail" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-white z-20 translate-x-full transition-transform duration-300">
             <!-- Header -->
-            <header class="bg-theme text-white p-3 shadow-md z-30 shrink-0">
-                <div class="flex items-center justify-between mb-2">
+            <header class="bg-theme text-white p-3 shadow-md z-30 shrink-0 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2 relative z-10">
                     <button onclick="goBack()" class="p-2 -ml-1 rounded-full active:bg-white/20 transition">
                         <i data-lucide="arrow-left" class="w-6 h-6"></i>
                     </button>
                     <div class="text-center flex-1 mx-2 overflow-hidden px-2">
-                        <h2 id="detail-title" class="font-bold text-lg truncate leading-tight">Title</h2>
-                        <span id="detail-cost" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full inline-block mt-0.5">總花費: NT$ 0</span>
+                        <div class="flex items-center justify-center gap-2">
+                            <h2 id="detail-title" class="font-bold text-lg truncate leading-tight">Title</h2>
+                            <!-- Destination Weather -->
+                            <div id="dest-weather-badge" class="hidden flex items-center gap-1 bg-white/20 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+                                <span id="dest-temp" class="text-xs font-bold">--°</span>
+                                <i id="dest-weather-icon" data-lucide="sun" class="w-3 h-3 text-yellow-300"></i>
+                            </div>
+                        </div>
+                        <span id="detail-cost" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full inline-block mt-0.5 font-mono">總花費: NT$ 0</span>
                     </div>
                     <button onclick="exportPDF()" class="p-2 -mr-1 rounded-full active:bg-white/20 transition">
                         <i data-lucide="share-2" class="w-5 h-5"></i>
                     </button>
                 </div>
                 <!-- Tabs -->
-                <div class="flex bg-black/10 rounded-lg p-1 max-w-md mx-auto w-full">
+                <div class="flex bg-black/10 rounded-lg p-1 max-w-md mx-auto w-full relative z-10">
                     <button onclick="switchTab('itinerary')" id="tab-itinerary" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition">行程</button>
                     <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">記帳 & 購物</button>
                 </div>
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-hidden relative w-full max-w-3xl mx-auto">
+            <div class="flex-1 overflow-hidden relative w-full mx-auto bg-gray-50">
                 
                 <!-- Tab: Itinerary -->
-                <div id="content-itinerary" class="absolute inset-0 overflow-y-auto bg-gray-50 pb-20 scroll-smooth">
+                <div id="content-itinerary" class="absolute inset-0 overflow-y-auto bg-gray-50 pb-20 scroll-smooth w-full max-w-3xl mx-auto">
                     <!-- Day Selector -->
                     <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100">
                         <div class="flex overflow-x-auto no-scrollbar p-2 gap-2" id="day-selector">
@@ -170,23 +196,25 @@
                     </div>
                 </div>
 
-                <!-- Tab: Shopping (Bookkeeping) -->
-                <div id="content-shopping" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20">
-                    <div class="bg-yellow-50 text-yellow-700 text-xs p-3 rounded-xl mb-4 flex items-start gap-2 border border-yellow-100">
-                        <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
-                        <p>勾選物品後，可輸入實際購買金額進行記帳。總花費將自動更新。</p>
-                    </div>
+                <!-- Tab: Shopping (Bookkeeping) - Centered Fixed Layout -->
+                <div id="content-shopping" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20 w-full">
+                    <div class="max-w-xl mx-auto"> <!-- Center Container -->
+                        <div class="bg-yellow-50 text-yellow-700 text-xs p-3 rounded-xl mb-4 flex items-start gap-2 border border-yellow-100 shadow-sm">
+                            <i data-lucide="coins" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                            <p>記帳提示：勾選後輸入金額，系統會依據設定的匯率自動換算回台幣(TWD)統計。</p>
+                        </div>
 
-                    <div class="mb-4 flex gap-2">
-                        <input type="text" id="new-shop-item" placeholder="輸入物品名稱..." class="flex-1 p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 border-theme shadow-sm">
-                        <button onclick="addShopItem()" class="bg-theme text-white px-4 rounded-lg shadow-sm font-bold text-xl">+</button>
-                    </div>
-                    <div id="shopping-list" class="space-y-3">
-                        <!-- Shopping items -->
-                    </div>
-                    <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                        <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 opacity-30"></i>
-                        <p class="text-sm">清單是空的</p>
+                        <div class="mb-4 flex gap-2">
+                            <input type="text" id="new-shop-item" placeholder="輸入物品名稱..." class="flex-1 p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 border-theme shadow-sm">
+                            <button onclick="addShopItem()" class="bg-theme text-white px-4 rounded-lg shadow-sm font-bold text-xl active:scale-95 transition">+</button>
+                        </div>
+                        <div id="shopping-list" class="space-y-3">
+                            <!-- Shopping items -->
+                        </div>
+                        <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                            <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 opacity-30"></i>
+                            <p class="text-sm">清單是空的</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -202,19 +230,47 @@
 
     <!-- ==================== MODALS ==================== -->
     
-    <!-- Modal: Settings -->
+    <!-- Modal: Settings (Rates) -->
     <div id="modal-settings" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">設定</h3>
+        <div class="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl modal-body-scroll max-h-[85vh]">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">APP 設定</h3>
+            
             <div class="mb-6">
                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">主題顏色</label>
                 <div class="flex gap-4 justify-center">
-                    <button onclick="setTheme('teal')" class="w-12 h-12 rounded-full bg-teal-600 ring-4 ring-transparent focus:ring-teal-200 transition"></button>
-                    <button onclick="setTheme('rose')" class="w-12 h-12 rounded-full bg-rose-500 ring-4 ring-transparent focus:ring-rose-200 transition"></button>
-                    <button onclick="setTheme('blue')" class="w-12 h-12 rounded-full bg-blue-600 ring-4 ring-transparent focus:ring-blue-200 transition"></button>
+                    <button onclick="setTheme('teal')" class="w-10 h-10 rounded-full bg-teal-600 ring-2 ring-transparent focus:ring-teal-200"></button>
+                    <button onclick="setTheme('rose')" class="w-10 h-10 rounded-full bg-rose-500 ring-2 ring-transparent focus:ring-rose-200"></button>
+                    <button onclick="setTheme('blue')" class="w-10 h-10 rounded-full bg-blue-600 ring-2 ring-transparent focus:ring-blue-200"></button>
                 </div>
             </div>
-            <button onclick="closeModal('modal-settings')" class="w-full py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200">關閉</button>
+
+            <div class="mb-6 border-t border-gray-100 pt-4">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">匯率設定 (對台幣)</label>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="w-12 font-bold text-gray-600">JPY</span>
+                        <input type="number" id="rate-JPY" step="0.001" onchange="updateRate('JPY', this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="w-12 font-bold text-gray-600">USD</span>
+                        <input type="number" id="rate-USD" step="0.1" onchange="updateRate('USD', this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="w-12 font-bold text-gray-600">KRW</span>
+                        <input type="number" id="rate-KRW" step="0.001" onchange="updateRate('KRW', this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="w-12 font-bold text-gray-600">EUR</span>
+                        <input type="number" id="rate-EUR" step="0.1" onchange="updateRate('EUR', this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="w-12 font-bold text-gray-600">HKD</span>
+                        <input type="number" id="rate-HKD" step="0.1" onchange="updateRate('HKD', this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeModal('modal-settings')" class="w-full py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200">完成</button>
         </div>
     </div>
 
@@ -224,6 +280,7 @@
             <h3 class="text-lg font-bold mb-4 text-gray-800 shrink-0">建立新旅行</h3>
             <div class="space-y-4 modal-body-scroll">
                 <input type="text" id="input-trip-name" placeholder="旅行名稱 (如: 東京五日遊)" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
+                <input type="text" id="input-trip-city" placeholder="主要城市 (英文, 顯示天氣用, 如: Tokyo)" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
                 <input type="date" id="input-trip-date" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
                 <div class="flex items-center justify-between bg-gray-50 p-2 rounded-xl">
                     <button onclick="adjustDays(-1)" class="w-10 h-10 rounded-lg bg-white shadow-sm font-bold text-gray-500 active:scale-95">-</button>
@@ -272,8 +329,16 @@
                         <input type="text" id="item-location" placeholder="Google Maps 地點" class="w-full p-1 text-sm outline-none">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-gray-400 shrink-0">NT$</span>
-                        <input type="number" id="item-cost" placeholder="預估費用" class="w-full p-1 text-sm outline-none">
+                        <!-- Currency Selector -->
+                        <select id="item-currency" class="text-xs font-bold text-gray-500 bg-gray-100 rounded p-1 outline-none">
+                            <option value="TWD">TWD</option>
+                            <option value="JPY">JPY</option>
+                            <option value="USD">USD</option>
+                            <option value="KRW">KRW</option>
+                            <option value="EUR">EUR</option>
+                            <option value="HKD">HKD</option>
+                        </select>
+                        <input type="number" id="item-cost" placeholder="費用" class="w-full p-1 text-sm outline-none">
                     </div>
                 </div>
 
@@ -315,8 +380,18 @@
             blue: { main: '#2563eb', light: '#eff6ff' }
         };
 
-        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v6')) || [];
-        let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings')) || { theme: 'teal' };
+        // Default Exchange Rates (Approximate)
+        let defaultRates = {
+            TWD: 1,
+            JPY: 0.22,
+            USD: 31.5,
+            KRW: 0.024,
+            EUR: 34.2,
+            HKD: 4.05
+        };
+
+        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v7')) || [];
+        let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings_v7')) || { theme: 'teal', rates: defaultRates };
         let currentTripId = null;
         let currentDayIndex = 0;
         let tempDaysCount = 3;
@@ -328,7 +403,88 @@
             lucide.createIcons();
             renderHome();
             document.getElementById('input-trip-date').valueAsDate = new Date();
+            loadRatesToModal();
+            fetchCurrentLocationWeather();
         });
+
+        // --- Currency Logic (v7.0) ---
+        function loadRatesToModal() {
+            if(!appSettings.rates) appSettings.rates = defaultRates;
+            document.getElementById('rate-JPY').value = appSettings.rates.JPY;
+            document.getElementById('rate-USD').value = appSettings.rates.USD;
+            document.getElementById('rate-KRW').value = appSettings.rates.KRW;
+            document.getElementById('rate-EUR').value = appSettings.rates.EUR;
+            document.getElementById('rate-HKD').value = appSettings.rates.HKD;
+        }
+
+        function updateRate(curr, val) {
+            appSettings.rates[curr] = parseFloat(val);
+            localStorage.setItem('travelFlow_settings_v7', JSON.stringify(appSettings));
+            updateCostDisplay(); // Refresh cost immediately
+        }
+
+        function convertToTWD(amount, currency) {
+            if (!amount) return 0;
+            const rate = appSettings.rates[currency] || 1;
+            return Math.round(amount * rate);
+        }
+
+        // --- Weather Logic (v7.0) ---
+        // Using Open-Meteo API (Free, No Key)
+        
+        async function fetchCurrentLocationWeather() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                updateWeatherDisplay(lat, lon, 'current-weather-badge', 'current-temp', 'current-weather-icon');
+            }, (err) => console.log('Loc Error', err));
+        }
+
+        async function fetchTripWeather(city) {
+            if (!city) {
+                document.getElementById('dest-weather-badge').classList.add('hidden');
+                return;
+            }
+            // Simple Geocoding via Open-Meteo
+            try {
+                const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+
+                if (geoData.results && geoData.results.length > 0) {
+                    const { latitude, longitude } = geoData.results[0];
+                    updateWeatherDisplay(latitude, longitude, 'dest-weather-badge', 'dest-temp', 'dest-weather-icon');
+                }
+            } catch (e) { console.error("Weather fetch failed", e); }
+        }
+
+        async function updateWeatherDisplay(lat, lon, badgeId, tempId, iconId) {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (data.current_weather) {
+                    const temp = Math.round(data.current_weather.temperature);
+                    const code = data.current_weather.weathercode;
+                    
+                    document.getElementById(tempId).innerText = `${temp}°C`;
+                    document.getElementById(badgeId).classList.remove('hidden');
+                    
+                    // Simple Icon mapping
+                    const iconEl = document.getElementById(iconId);
+                    // WMO Weather interpretation codes
+                    if (code <= 3) iconEl.setAttribute('data-lucide', 'sun');
+                    else if (code <= 48) iconEl.setAttribute('data-lucide', 'cloud');
+                    else if (code <= 67) iconEl.setAttribute('data-lucide', 'cloud-rain');
+                    else if (code <= 77) iconEl.setAttribute('data-lucide', 'snowflake');
+                    else iconEl.setAttribute('data-lucide', 'cloud-lightning');
+                    
+                    lucide.createIcons();
+                }
+            } catch(e) { console.log(e); }
+        }
 
         // --- Theme ---
         function applyTheme(themeName) {
@@ -337,7 +493,7 @@
             root.style.setProperty('--color-main', theme.main);
             root.style.setProperty('--color-light', theme.light);
             appSettings.theme = themeName;
-            localStorage.setItem('travelFlow_settings', JSON.stringify(appSettings));
+            localStorage.setItem('travelFlow_settings_v7', JSON.stringify(appSettings));
         }
         function setTheme(name) { applyTheme(name); renderHome(); if(currentTripId) renderTimeline(); }
         function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
@@ -345,7 +501,7 @@
 
         // --- Helpers ---
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-        function saveData() { localStorage.setItem('travelFlow_trips_v6', JSON.stringify(trips)); }
+        function saveData() { localStorage.setItem('travelFlow_trips_v7', JSON.stringify(trips)); }
         function getTrip(id) { return trips.find(t => t.id === id); }
         
         function getDayName(dateStr, addDays) {
@@ -355,24 +511,26 @@
             return days[date.getDay()];
         }
 
-        // New Cost Calculation: Plan A cost + Checked Shopping items cost
+        // 7.0 Cost Calculation with Exchange Rates
         function calculateTotalCost(trip) {
-            let total = 0;
-            // 1. Itinerary Costs
+            let totalTWD = 0;
+            // 1. Itinerary
             if (trip.days) {
                 trip.days.forEach(day => {
-                    day.items.forEach(item => { total += parseInt(item.cost) || 0; });
+                    day.items.forEach(item => {
+                        totalTWD += convertToTWD(parseInt(item.cost), item.currency || 'TWD');
+                    });
                 });
             }
-            // 2. Shopping Costs (Bookkeeping)
+            // 2. Shopping
             if (trip.shoppingList) {
                 trip.shoppingList.forEach(item => {
                     if (item.checked && item.price) {
-                        total += parseInt(item.price) || 0;
+                        totalTWD += convertToTWD(parseInt(item.price), item.currency || 'TWD');
                     }
                 });
             }
-            return total;
+            return totalTWD;
         }
 
         // --- Views ---
@@ -380,38 +538,28 @@
             currentTripId = id;
             const trip = getTrip(id);
             
-            // 6.0 Feature: Auto-detect today
+            // Auto-detect day
             const today = new Date();
             today.setHours(0,0,0,0);
             const start = new Date(trip.startDate);
             start.setHours(0,0,0,0);
-            
-            // Calculate day difference
-            const diffTime = Math.abs(today - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            
-            if (today >= start && diffDays <= trip.days.length) {
-                // Determine index (0-based) based on date math roughly
-                // A more robust way:
-                const dayMs = 1000 * 60 * 60 * 24;
-                const index = Math.round((today - start) / dayMs);
-                if (index >= 0 && index < trip.days.length) {
-                    currentDayIndex = index;
-                } else {
-                    currentDayIndex = 0;
-                }
-            } else {
-                currentDayIndex = 0;
-            }
+            const dayMs = 1000 * 60 * 60 * 24;
+            const index = Math.round((today - start) / dayMs);
+            if (index >= 0 && index < trip.days.length) { currentDayIndex = index; } 
+            else { currentDayIndex = 0; }
 
             switchTab('itinerary');
             document.getElementById('detail-title').innerText = trip.title;
+            
+            // 7.0 Fetch Destination Weather
+            fetchTripWeather(trip.city);
+            
             updateCostDisplay();
             document.getElementById('view-detail').classList.remove('translate-x-full');
             renderDays();
             renderTimeline();
             renderShopping();
-            startLiveTracking(); // Start tracking time
+            startLiveTracking();
         }
 
         function goBack() {
@@ -433,7 +581,7 @@
                 itineraryContent.classList.remove('hidden');
                 shoppingContent.classList.add('hidden');
                 fab.classList.remove('hidden');
-                startLiveTracking(); // Ensure tracking is on
+                startLiveTracking();
                 scrollToActiveItem();
             } else {
                 btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
@@ -441,7 +589,7 @@
                 shoppingContent.classList.remove('hidden');
                 itineraryContent.classList.add('hidden');
                 fab.classList.add('hidden');
-                stopLiveTracking(); // Stop tracking when shopping
+                stopLiveTracking();
             }
         }
 
@@ -451,34 +599,24 @@
             document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`;
         }
 
-        // --- Live Tracking Logic (v6.0) ---
+        // --- Live Tracking ---
         function startLiveTracking() {
             if (liveTrackerInterval) clearInterval(liveTrackerInterval);
-            updateLiveStatus(); // Run immediately
-            liveTrackerInterval = setInterval(updateLiveStatus, 60000); // Check every minute
+            updateLiveStatus();
+            liveTrackerInterval = setInterval(updateLiveStatus, 60000);
         }
         function stopLiveTracking() {
             if (liveTrackerInterval) clearInterval(liveTrackerInterval);
-            // Remove active classes
             document.querySelectorAll('.active-item-card').forEach(el => el.classList.remove('active-item-card'));
         }
-
         function updateLiveStatus() {
             const trip = getTrip(currentTripId);
             if (!trip) return;
-
-            // Check if current view Day matches Today
             const today = new Date();
-            const start = new Date(trip.startDate);
-            start.setHours(0,0,0,0);
+            const start = new Date(trip.startDate); start.setHours(0,0,0,0);
+            const viewDate = new Date(start); viewDate.setDate(viewDate.getDate() + currentDayIndex);
             
-            // Calculate date of current view index
-            const viewDate = new Date(start);
-            viewDate.setDate(viewDate.getDate() + currentDayIndex);
-            
-            // Compare YYYY-MM-DD
             if (viewDate.toDateString() !== today.toDateString()) {
-                // Not today's schedule, remove highlight
                 document.querySelectorAll('.active-item-card').forEach(el => el.classList.remove('active-item-card'));
                 return;
             }
@@ -486,52 +624,30 @@
             const nowTime = today.getHours() * 60 + today.getMinutes();
             const items = trip.days[currentDayIndex].items;
             let activeItemId = null;
-            let minDiff = Infinity;
-
-            // Find the item that is current (time <= now) but closest to now
-            // OR the immediate next item if nothing is "current" yet (early morning)
             
-            // Convert items to minutes
             const sortedItems = items.map(i => {
                 const [h, m] = i.time.split(':').map(Number);
                 return { ...i, mins: h * 60 + m };
             }).sort((a, b) => a.mins - b.mins);
 
-            // Logic: Highlight the event that started most recently
             for (let i = 0; i < sortedItems.length; i++) {
-                if (sortedItems[i].mins <= nowTime) {
-                    activeItemId = sortedItems[i].id; // Keep updating as we find later events that started
-                } else {
-                    // This event is in future. 
-                    // If no event has started yet (activeItemId is null), maybe highlight first upcoming?
-                    // Let's stick to "Current Active" for strict tracking.
-                    break;
-                }
+                if (sortedItems[i].mins <= nowTime) activeItemId = sortedItems[i].id; else break;
             }
-            
-            // If nothing started yet, highlight first item? No, user said "if no then don't show"
-            // But let's highlight if it's within 30 mins before start?
             if (!activeItemId && sortedItems.length > 0) {
-                 if (sortedItems[0].mins - nowTime <= 60 && sortedItems[0].mins > nowTime) {
-                     activeItemId = sortedItems[0].id; // Upcoming within hour
-                 }
+                 if (sortedItems[0].mins - nowTime <= 60 && sortedItems[0].mins > nowTime) activeItemId = sortedItems[0].id;
             }
 
-            // Apply Visuals
             document.querySelectorAll('.active-item-card').forEach(el => el.classList.remove('active-item-card'));
             if (activeItemId) {
                 const el = document.getElementById(`card-${activeItemId}`);
                 if (el) el.classList.add('active-item-card');
             }
         }
-
         function scrollToActiveItem() {
             setTimeout(() => {
                 const active = document.querySelector('.active-item-card');
-                if (active) {
-                    active.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 300); // Wait for render
+                if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
         }
 
         // --- Home ---
@@ -588,8 +704,7 @@
                 const el = document.createElement('div');
                 el.className = 'swipe-item-container relative mb-6 pl-9';
                 
-                let iconName = 'map-pin';
-                let colorClass = 'bg-blue-500';
+                let iconName = 'map-pin'; let colorClass = 'bg-blue-500';
                 if (item.type === 'food') { iconName = 'utensils'; colorClass = 'bg-orange-500'; }
                 if (item.type === 'transport') { iconName = 'bus'; colorClass = 'bg-indigo-500'; }
                 if (item.type === 'stay') { iconName = 'bed'; colorClass = 'bg-purple-500'; }
@@ -597,6 +712,10 @@
 
                 const mapLink = item.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}` : '#';
                 const backupMapLink = item.backupLocation ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.backupLocation)}` : '#';
+
+                // Currency Display logic
+                const curr = item.currency || 'TWD';
+                const costDisplay = item.cost ? `${curr} ${item.cost}` : '';
 
                 el.innerHTML = `
                     <div class="absolute left-0 top-1 w-8 h-8 flex items-center justify-center z-10 bg-gray-50">
@@ -614,7 +733,10 @@
                             
                             <!-- Plan A -->
                             <div class="flex-1 min-w-[150px]">
-                                <span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block mb-1">${item.time}</span>
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>
+                                    ${costDisplay ? `<span class="text-xs font-bold text-gray-500">${costDisplay}</span>` : ''}
+                                </div>
                                 <h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>
                                 ${item.location ? `
                                 <a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="inline-flex items-center text-xs text-gray-500 hover:text-theme gap-1 bg-gray-50 px-2 py-1 rounded transition max-w-full truncate">
@@ -639,7 +761,7 @@
                 container.appendChild(el);
             });
             lucide.createIcons();
-            updateLiveStatus(); // Apply highlight immediately
+            updateLiveStatus();
         }
 
         // --- Swipe Logic ---
@@ -664,7 +786,7 @@
             isSwiping = false; touchStartX = 0; touchCurrentX = 0;
         }
 
-        // --- Shopping & Bookkeeping (v6.0) ---
+        // --- Shopping (v7.0) ---
         function renderShopping() {
             const trip = getTrip(currentTripId);
             const container = document.getElementById('shopping-list');
@@ -678,14 +800,21 @@
                 const el = document.createElement('div');
                 el.className = 'swipe-item-container rounded-xl overflow-hidden';
                 
-                // Show Price Input if checked
+                // Show Price Input with Currency Selector if checked
                 const priceInputHtml = item.checked ? `
-                    <div class="flex items-center border-l border-gray-100 pl-3 ml-2 animate-fade-in">
-                        <span class="text-xs font-bold text-gray-400 mr-1">$</span>
+                    <div class="flex items-center border-l border-gray-100 pl-2 ml-2 animate-fade-in gap-1">
+                        <select onchange="updateShopCurrency('${item.id}', this.value)" class="text-[10px] bg-gray-100 rounded p-1 font-bold text-gray-500 outline-none">
+                            <option value="TWD" ${item.currency === 'TWD' ? 'selected' : ''}>TWD</option>
+                            <option value="JPY" ${item.currency === 'JPY' ? 'selected' : ''}>JPY</option>
+                            <option value="USD" ${item.currency === 'USD' ? 'selected' : ''}>USD</option>
+                            <option value="KRW" ${item.currency === 'KRW' ? 'selected' : ''}>KRW</option>
+                            <option value="EUR" ${item.currency === 'EUR' ? 'selected' : ''}>EUR</option>
+                            <option value="HKD" ${item.currency === 'HKD' ? 'selected' : ''}>HKD</option>
+                        </select>
                         <input type="number" 
                             value="${item.price || ''}" 
                             onchange="updateShopPrice('${item.id}', this.value)"
-                            placeholder="金額" 
+                            placeholder="0" 
                             class="w-16 p-1 text-sm bg-gray-50 rounded border-none focus:ring-1 focus:ring-teal-500 outline-none text-right font-bold text-theme">
                     </div>
                 ` : '';
@@ -696,7 +825,7 @@
                          ontouchstart="handleTouchStart(event, this, '${item.id}', 'shop')"
                          ontouchmove="handleTouchMove(event, this)"
                          ontouchend="handleTouchEnd(event, this, '${item.id}', 'shop')">
-                        <div class="flex items-center gap-3 flex-1">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
                             <button onclick="toggleShopItem('${item.id}')" class="text-theme flex-shrink-0">
                                 ${item.checked ? '<i data-lucide="check-square" class="w-6 h-6"></i>' : '<i data-lucide="square" class="w-6 h-6 text-gray-300"></i>'}
                             </button>
@@ -714,11 +843,10 @@
             if (!input.value.trim()) return;
             const trip = getTrip(currentTripId);
             if (!trip.shoppingList) trip.shoppingList = [];
-            trip.shoppingList.push({ id: generateId(), text: input.value.trim(), checked: false, price: 0 });
+            // Default currency to TWD
+            trip.shoppingList.push({ id: generateId(), text: input.value.trim(), checked: false, price: 0, currency: 'TWD' });
             input.value = '';
-            saveData();
-            renderShopping();
-            updateCostDisplay();
+            saveData(); renderShopping(); updateCostDisplay();
         }
 
         function toggleShopItem(id) {
@@ -726,19 +854,20 @@
             const item = trip.shoppingList.find(i => i.id === id);
             if(item) { item.checked = !item.checked; saveData(); renderShopping(); updateCostDisplay(); }
         }
-
         function updateShopPrice(id, price) {
             const trip = getTrip(currentTripId);
             const item = trip.shoppingList.find(i => i.id === id);
             if(item) { item.price = price; saveData(); updateCostDisplay(); }
         }
-
+        function updateShopCurrency(id, curr) {
+            const trip = getTrip(currentTripId);
+            const item = trip.shoppingList.find(i => i.id === id);
+            if(item) { item.currency = curr; saveData(); updateCostDisplay(); }
+        }
         function deleteShopItem(id) {
             const trip = getTrip(currentTripId);
             trip.shoppingList = trip.shoppingList.filter(i => i.id !== id);
-            saveData();
-            renderShopping();
-            updateCostDisplay();
+            saveData(); renderShopping(); updateCostDisplay();
         }
 
         // --- Modals & CRUD ---
@@ -747,20 +876,20 @@
             tempDaysCount = 3;
             document.getElementById('display-days-count').innerText = tempDaysCount + ' 天';
             document.getElementById('input-trip-name').value = '';
+            document.getElementById('input-trip-city').value = '';
         }
         function adjustDays(d) {
-            tempDaysCount += d;
-            if(tempDaysCount < 1) tempDaysCount = 1;
+            tempDaysCount += d; if(tempDaysCount < 1) tempDaysCount = 1;
             document.getElementById('display-days-count').innerText = tempDaysCount + ' 天';
         }
         function saveNewTrip() {
             const title = document.getElementById('input-trip-name').value.trim();
+            const city = document.getElementById('input-trip-city').value.trim();
             const date = document.getElementById('input-trip-date').value;
             if (!title || !date) return alert('請填寫完整資訊');
-            const newTrip = { id: generateId(), title, startDate: date, createdAt: new Date().toISOString(), shoppingList: [], days: [] };
+            const newTrip = { id: generateId(), title, city, startDate: date, createdAt: new Date().toISOString(), shoppingList: [], days: [] };
             for(let i=0; i<tempDaysCount; i++) newTrip.days.push({ items: [] });
-            trips.push(newTrip);
-            saveData(); renderHome(); closeModal('modal-trip');
+            trips.push(newTrip); saveData(); renderHome(); closeModal('modal-trip');
         }
         function deleteTrip(id) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); }
 
@@ -776,6 +905,7 @@
             document.getElementById('item-title').value = '';
             document.getElementById('item-location').value = '';
             document.getElementById('item-cost').value = '';
+            document.getElementById('item-currency').value = 'TWD';
             document.getElementById('item-note').value = '';
             document.getElementById('has-plan-b').checked = false;
             togglePlanBInputs();
@@ -792,6 +922,7 @@
             document.getElementById('item-title').value = item.title;
             document.getElementById('item-location').value = item.location || '';
             document.getElementById('item-cost').value = item.cost || '';
+            document.getElementById('item-currency').value = item.currency || 'TWD';
             document.getElementById('item-note').value = item.note || '';
             document.getElementById('item-type').value = item.type;
             document.getElementById('has-plan-b').checked = item.hasBackup || false;
@@ -805,15 +936,15 @@
             const type = document.getElementById('item-type').value;
             const location = document.getElementById('item-location').value.trim();
             const cost = document.getElementById('item-cost').value;
+            const currency = document.getElementById('item-currency').value;
             const note = document.getElementById('item-note').value.trim();
             const hasBackup = document.getElementById('has-plan-b').checked;
             const backupTitle = document.getElementById('backup-title').value.trim();
             const backupLocation = document.getElementById('backup-location').value.trim();
 
             if (!title) return alert('請輸入標題');
-            
             const trip = getTrip(currentTripId);
-            const newItem = { id: editingItemId || generateId(), time, title, type, location, cost, note, hasBackup, backupTitle, backupLocation };
+            const newItem = { id: editingItemId || generateId(), time, title, type, location, cost, currency, note, hasBackup, backupTitle, backupLocation };
             
             if (editingItemId) {
                 const idx = trip.days[currentDayIndex].items.findIndex(i => i.id === editingItemId);
@@ -826,7 +957,6 @@
             trip.days[currentDayIndex].items = trip.days[currentDayIndex].items.filter(i => i.id !== itemId);
             saveData(); renderTimeline(); updateCostDisplay();
         }
-
         function renderDays() {
             const trip = getTrip(currentTripId);
             const container = document.getElementById('day-selector');
@@ -845,7 +975,6 @@
             addBtn.onclick = () => { trip.days.push({ items: [] }); saveData(); renderDays(); };
             container.appendChild(addBtn);
         }
-
         function exportPDF() {
             const trip = getTrip(currentTripId);
             const element = document.getElementById('pdf-target');

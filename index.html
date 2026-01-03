@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 5.0</title>
+    <title>TravelFlow 6.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -19,29 +19,29 @@
             --color-light: #f0fdfa;
             --color-bg: #f3f4f6;
             --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --safe-top: env(safe-area-inset-top, 20px);
         }
 
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--color-bg);
-            overscroll-behavior-y: none; /* Prevent pull-to-refresh */
+            overscroll-behavior-y: none;
             -webkit-user-select: none;
             user-select: none;
-            position: fixed; /* Lock body scroll */
+            position: fixed;
             width: 100%;
             height: 100%;
         }
 
-        /* Utility classes */
+        /* Utilities */
         .text-theme { color: var(--color-main); }
         .bg-theme { background-color: var(--color-main); }
         .bg-theme-light { background-color: var(--color-light); }
         .border-theme { border-color: var(--color-main); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Safe Area Padding for iPhone Home Bar */
         .pb-safe { padding-bottom: var(--safe-bottom); }
+        .pt-safe { padding-top: var(--safe-top); }
 
         /* Timeline Graphics */
         .timeline-line {
@@ -54,11 +54,39 @@
             z-index: 0;
         }
 
+        /* Live Indicator Animation */
+        .live-indicator-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #ef4444; /* Red */
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            right: 0;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse-red 1.5s infinite;
+        }
+        
+        .live-text {
+            animation: text-pulse 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        @keyframes text-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         /* Swipe Actions */
         .swipe-item-container {
             position: relative;
             overflow: hidden;
-            touch-action: pan-y; /* Allow vertical scroll, handle horizontal in JS */
+            touch-action: pan-y;
         }
         .swipe-content {
             position: relative;
@@ -78,40 +106,33 @@
             border-radius: 0.75rem;
         }
         
-        /* Modal Fixes: Ensure content is scrollable but buttons are fixed */
-        .modal-body-scroll {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+        /* Modal Scroll Fix */
+        .modal-body-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
 <body>
 
-    <!-- App Container: Full Screen Flexbox -->
+    <!-- App Container -->
     <div id="app" class="w-full h-full bg-white flex flex-col relative overflow-hidden">
         
         <!-- ==================== VIEW: HOME ==================== -->
         <div id="view-home" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-gray-50 z-10 transition-transform duration-300">
-            <!-- Header -->
-            <header class="bg-white p-4 shadow-sm z-20 flex justify-between items-center shrink-0">
+            <header class="bg-white p-4 pt-safe shadow-sm z-20 flex justify-between items-center shrink-0">
                 <div>
                     <h1 class="text-2xl font-bold text-theme flex items-center gap-2">
                         <i data-lucide="plane" class="w-6 h-6"></i> TravelFlow
                     </h1>
-                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v5.0)</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v6.0)</p>
                 </div>
                 <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100">
                     <i data-lucide="settings" class="w-6 h-6"></i>
                 </button>
             </header>
             
-            <!-- List Container -->
             <div class="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-2xl mx-auto" id="trip-list-container">
-                <!-- Trip cards injected here -->
+                <!-- Trip cards -->
             </div>
 
-            <!-- Footer Action -->
             <div class="p-4 bg-white border-t border-gray-100 shrink-0 pb-safe">
                 <button onclick="openAddTripModal()" class="w-full max-w-2xl mx-auto bg-theme text-white font-medium py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95">
                     <i data-lucide="plus-circle" class="w-5 h-5"></i> 新增旅行
@@ -122,7 +143,7 @@
         <!-- ==================== VIEW: DETAIL ==================== -->
         <div id="view-detail" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-white z-20 translate-x-full transition-transform duration-300">
             <!-- Header -->
-            <header class="bg-theme text-white p-3 shadow-md z-30 shrink-0">
+            <header class="bg-theme text-white p-3 pt-safe shadow-md z-30 shrink-0">
                 <div class="flex items-center justify-between mb-2">
                     <button onclick="goBack()" class="p-2 -ml-1 rounded-full active:bg-white/20 transition">
                         <i data-lucide="arrow-left" class="w-6 h-6"></i>
@@ -143,52 +164,61 @@
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-hidden relative w-full max-w-3xl mx-auto">
+            <div class="flex-1 overflow-hidden relative w-full max-w-3xl mx-auto flex flex-col">
                 
                 <!-- Tab: Itinerary -->
-                <div id="content-itinerary" class="absolute inset-0 overflow-y-auto bg-gray-50 pb-20 scroll-smooth">
-                    <!-- Day Selector -->
-                    <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100">
+                <div id="content-itinerary" class="absolute inset-0 flex flex-col bg-gray-50">
+                    <!-- Day Selector (Sticky) -->
+                    <div class="bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100 shrink-0">
                         <div class="flex overflow-x-auto no-scrollbar p-2 gap-2" id="day-selector">
-                            <!-- Days injected here -->
+                            <!-- Days -->
                         </div>
                     </div>
 
-                    <!-- PDF Target -->
-                    <div id="pdf-target" class="bg-gray-50 min-h-full">
-                        <div id="timeline-container" class="p-4 relative min-h-[300px]">
-                            <!-- Timeline items injected here -->
+                    <!-- Scrollable Timeline -->
+                    <div class="flex-1 overflow-y-auto pb-24 scroll-smooth" id="itinerary-scroll-area">
+                        <div id="pdf-target" class="min-h-full">
+                            <div id="timeline-container" class="p-4 relative min-h-[300px]">
+                                <!-- Timeline Items -->
+                            </div>
+                        </div>
+                        <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                            <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
+                            <p class="text-sm">尚未新增行程</p>
                         </div>
                     </div>
-
-                    <!-- Empty State -->
-                    <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                        <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
-                        <p class="text-sm">尚未新增行程</p>
+                    
+                    <!-- FAB (Inside Itinerary) -->
+                    <div class="absolute bottom-6 right-6 z-40 pb-safe">
+                        <button onclick="openAddItemModal()" class="bg-theme text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition active:scale-90 active:rotate-90">
+                            <i data-lucide="plus" class="w-8 h-8"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Tab: Shopping -->
-                <div id="content-shopping" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20">
-                    <div class="mb-4 flex gap-2">
-                        <input type="text" id="new-shop-item" placeholder="輸入物品..." class="flex-1 p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 border-theme shadow-sm">
-                        <button onclick="addShopItem()" class="bg-theme text-white px-4 rounded-lg shadow-sm font-bold text-xl">+</button>
+                <!-- Tab: Shopping (Fixed Layout) -->
+                <div id="content-shopping" class="absolute inset-0 flex flex-col bg-gray-50 hidden">
+                    <!-- Fixed Header Input -->
+                    <div class="p-4 bg-white border-b border-gray-100 shadow-sm shrink-0 z-20">
+                        <div class="flex gap-2 w-full">
+                            <input type="text" id="new-shop-item" placeholder="輸入要買的物品..." class="flex-1 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 border-theme shadow-sm bg-gray-50">
+                            <button onclick="addShopItem()" class="bg-theme text-white w-12 rounded-xl shadow-sm font-bold text-xl active:scale-95 transition flex items-center justify-center">
+                                <i data-lucide="plus" class="w-6 h-6"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div id="shopping-list" class="space-y-3">
-                        <!-- Shopping items -->
-                    </div>
-                    <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                        <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 opacity-30"></i>
-                        <p class="text-sm">清單是空的</p>
+                    
+                    <!-- Scrollable List -->
+                    <div id="shopping-list-scroll" class="flex-1 overflow-y-auto p-4 pb-safe space-y-3">
+                        <div id="shopping-list">
+                            <!-- Items -->
+                        </div>
+                        <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                            <i data-lucide="shopping-cart" class="w-12 h-12 mb-2 opacity-30"></i>
+                            <p class="text-sm">購買清單是空的</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Floating Action Button -->
-            <div id="fab-container" class="absolute bottom-6 right-6 z-40 pb-safe">
-                <button onclick="openAddItemModal()" class="bg-theme text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition active:scale-90 active:rotate-90">
-                    <i data-lucide="plus" class="w-8 h-8"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -211,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Modal: Add Trip (Centered) -->
+    <!-- Modal: Add Trip -->
     <div id="modal-trip" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl flex flex-col max-h-[80vh]">
             <h3 class="text-lg font-bold mb-4 text-gray-800 shrink-0">建立新旅行</h3>
@@ -231,20 +261,14 @@
         </div>
     </div>
 
-    <!-- Modal: Item (Bottom Sheet / Full Height safe layout) -->
+    <!-- Modal: Item -->
     <div id="modal-item" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center sm:p-4 backdrop-blur-sm">
-        <!-- Responsive Container: Full screen on mobile, centered card on tablet -->
         <div class="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col animate-slide-up">
-            
-            <!-- Fixed Header -->
             <div class="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
                 <h3 id="modal-item-title" class="text-lg font-bold text-gray-800">行程細節</h3>
                 <button onclick="closeModal('modal-item')" class="p-1 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
             </div>
-            
-            <!-- Scrollable Content -->
             <div class="p-5 modal-body-scroll space-y-5">
-                <!-- Time & Type -->
                 <div class="flex gap-3">
                     <div class="w-1/3">
                         <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">時間</label>
@@ -261,10 +285,8 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Plan A -->
                 <div class="p-4 border border-gray-100 rounded-2xl relative shadow-sm">
-                    <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">主要行程 Plan A</span>
+                    <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">Plan A</span>
                     <input type="text" id="item-title" placeholder="要做什麼？" class="w-full p-2 mb-2 font-medium text-lg border-b border-gray-100 outline-none placeholder-gray-300">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i>
@@ -275,16 +297,11 @@
                         <input type="number" id="item-cost" placeholder="費用" class="w-full p-1 text-sm outline-none">
                     </div>
                 </div>
-
-                <!-- Plan B -->
                 <div class="border border-dashed border-gray-300 rounded-2xl p-4 bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center gap-2 text-sm font-bold text-gray-600">
-                            <input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded">
-                            啟用備案 (Plan B)
-                        </label>
-                    </div>
-                    
+                    <label class="flex items-center gap-2 text-sm font-bold text-gray-600">
+                        <input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded">
+                        啟用備案 (Plan B)
+                    </label>
                     <div id="plan-b-inputs" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-200">
                         <input type="text" id="backup-title" placeholder="備案標題..." class="w-full p-2 bg-white rounded-lg text-sm border border-gray-200 shadow-sm">
                         <div class="flex items-center gap-2">
@@ -293,18 +310,12 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Note -->
                 <div>
                     <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">備註</label>
                     <textarea id="item-note" rows="3" placeholder="詳細資訊..." class="w-full p-3 bg-gray-50 rounded-xl outline-none resize-none text-sm"></textarea>
                 </div>
-                
-                <!-- Spacer for scrolling -->
                 <div class="h-4"></div>
             </div>
-
-            <!-- Fixed Footer -->
             <div class="p-4 border-t border-gray-100 bg-white pb-safe shrink-0">
                 <button onclick="saveItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">儲存行程</button>
             </div>
@@ -312,19 +323,20 @@
     </div>
 
     <script>
-        // --- Configuration & Themes ---
+        // --- Configuration ---
         const THEMES = {
             teal: { main: '#0d9488', light: '#f0fdfa' },
             rose: { main: '#e11d48', light: '#fff1f2' },
             blue: { main: '#2563eb', light: '#eff6ff' }
         };
 
-        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v5')) || [];
+        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v6')) || [];
         let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings')) || { theme: 'teal' };
         let currentTripId = null;
         let currentDayIndex = 0;
         let tempDaysCount = 3;
         let editingItemId = null;
+        let liveInterval = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(appSettings.theme);
@@ -341,21 +353,12 @@
             appSettings.theme = themeName;
             localStorage.setItem('travelFlow_settings', JSON.stringify(appSettings));
         }
-
-        function setTheme(name) {
-            applyTheme(name);
-            renderHome();
-            if(currentTripId) renderTimeline();
-        }
-
+        function setTheme(name) { applyTheme(name); renderHome(); if(currentTripId) renderTimeline(); }
         function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        // --- Core Helpers ---
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-        function saveData() { localStorage.setItem('travelFlow_trips_v5', JSON.stringify(trips)); }
+        function saveData() { localStorage.setItem('travelFlow_trips_v6', JSON.stringify(trips)); }
         function getTrip(id) { return trips.find(t => t.id === id); }
-        
         function getDayName(dateStr, addDays) {
             const date = new Date(dateStr);
             date.setDate(date.getDate() + addDays);
@@ -364,14 +367,88 @@
         }
         function calculateTotalCost(trip) {
             let total = 0;
-            if (trip.days) {
-                trip.days.forEach(day => {
-                    day.items.forEach(item => {
-                        total += parseInt(item.cost) || 0;
-                    });
-                });
-            }
+            if (trip.days) trip.days.forEach(day => day.items.forEach(item => total += parseInt(item.cost) || 0));
             return total;
+        }
+
+        // --- Live Tracking Logic ---
+        function startLiveTracking() {
+            if (liveInterval) clearInterval(liveInterval);
+            updateLiveIndicator(); // Initial run
+            liveInterval = setInterval(updateLiveIndicator, 60000); // Check every minute
+        }
+
+        function stopLiveTracking() {
+            if (liveInterval) clearInterval(liveInterval);
+        }
+
+        function updateLiveIndicator() {
+            if (!currentTripId) return;
+            const trip = getTrip(currentTripId);
+            
+            // 1. Check if "Current Day Index" matches "Today's Date"
+            const tripStartDate = new Date(trip.startDate);
+            const viewingDate = new Date(tripStartDate);
+            viewingDate.setDate(tripStartDate.getDate() + currentDayIndex);
+            
+            const now = new Date();
+            const isSameDay = viewingDate.getDate() === now.getDate() && 
+                              viewingDate.getMonth() === now.getMonth() && 
+                              viewingDate.getFullYear() === now.getFullYear();
+
+            // Clear existing indicators
+            document.querySelectorAll('.live-indicator-dot, .live-text').forEach(el => el.remove());
+
+            if (!isSameDay) return; // Not today, don't show indicators
+
+            // 2. Find Current Item based on Time
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const currentTimeVal = currentHours * 60 + currentMinutes;
+
+            const items = trip.days[currentDayIndex].items;
+            // Assumes items are sorted by renderTimeline
+            
+            let activeItemId = null;
+            
+            // Logic: Find the last item that started (time <= now)
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const [h, m] = item.time.split(':').map(Number);
+                const itemTimeVal = h * 60 + m;
+
+                if (itemTimeVal <= currentTimeVal) {
+                    activeItemId = item.id; // This started in the past/now
+                } else {
+                    break; // Future item
+                }
+            }
+
+            // If no item started yet (early morning), maybe highlight the first one?
+            // Let's stick to "active or most recent". If activeItemId is null, means we are before first event.
+            // Option: Highlight first event as "Up Next"? Let's just highlight active.
+            
+            if (activeItemId) {
+                const itemEl = document.getElementById(`item-wrapper-${activeItemId}`);
+                if (itemEl) {
+                    // Inject Indicator
+                    const indicator = document.createElement('div');
+                    indicator.className = 'live-indicator-dot';
+                    // Find the time element to attach near, or just attach to the wrapper
+                    // Let's attach to the time badge inside
+                    const timeBadge = itemEl.querySelector('.time-badge');
+                    if (timeBadge) {
+                        timeBadge.style.position = 'relative';
+                        timeBadge.appendChild(indicator);
+                        
+                        // Optional text
+                        const text = document.createElement('span');
+                        text.className = 'live-text text-[10px] text-red-500 font-bold ml-1';
+                        text.innerText = 'NOW';
+                        timeBadge.parentNode.appendChild(text);
+                    }
+                }
+            }
         }
 
         // --- Views ---
@@ -386,9 +463,11 @@
             renderDays();
             renderTimeline();
             renderShopping();
+            startLiveTracking(); // Start monitoring
         }
 
         function goBack() {
+            stopLiveTracking();
             document.getElementById('view-detail').classList.add('translate-x-full');
             setTimeout(() => { currentTripId = null; renderHome(); }, 300);
         }
@@ -396,7 +475,6 @@
         function switchTab(tab) {
             const itineraryContent = document.getElementById('content-itinerary');
             const shoppingContent = document.getElementById('content-shopping');
-            const fab = document.getElementById('fab-container');
             const btnItinerary = document.getElementById('tab-itinerary');
             const btnShopping = document.getElementById('tab-shopping');
             
@@ -405,23 +483,20 @@
                 btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
                 itineraryContent.classList.remove('hidden');
                 shoppingContent.classList.add('hidden');
-                fab.classList.remove('hidden');
             } else {
                 btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
                 btnItinerary.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
                 shoppingContent.classList.remove('hidden');
                 itineraryContent.classList.add('hidden');
-                fab.classList.add('hidden');
             }
         }
-
         function updateCostDisplay() {
             const trip = getTrip(currentTripId);
             const total = calculateTotalCost(trip);
             document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`;
         }
 
-        // --- Home Logic ---
+        // --- Home ---
         function renderHome() {
             const container = document.getElementById('trip-list-container');
             container.innerHTML = '';
@@ -456,12 +531,11 @@
             lucide.createIcons();
         }
 
-        // --- Timeline Render (Fluid Plan A/B) ---
+        // --- Timeline ---
         function renderTimeline() {
             const trip = getTrip(currentTripId);
             const container = document.getElementById('timeline-container');
             const emptyState = document.getElementById('timeline-empty');
-            
             container.innerHTML = '<div class="timeline-line"></div>';
             const items = trip.days[currentDayIndex].items;
             if (items.length === 0) {
@@ -494,7 +568,7 @@
                             <i data-lucide="${iconName}" class="w-3.5 h-3.5"></i>
                         </div>
                     </div>
-                    <div class="relative">
+                    <div class="relative" id="item-wrapper-${item.id}">
                          <div class="swipe-action-bg rounded-xl"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div>
                          <div class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4"
                              onclick="openEditItemModal('${item.id}')"
@@ -504,7 +578,9 @@
                             
                             <!-- Plan A -->
                             <div class="flex-1 min-w-[150px]">
-                                <span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block mb-1">${item.time}</span>
+                                <div class="flex items-center gap-1 mb-1">
+                                    <span class="time-badge text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>
+                                </div>
                                 <h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>
                                 ${item.location ? `
                                 <a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="inline-flex items-center text-xs text-gray-500 hover:text-theme gap-1 bg-gray-50 px-2 py-1 rounded transition max-w-full truncate">
@@ -512,43 +588,37 @@
                                 </a>` : ''}
                                 ${item.note ? `<p class="mt-2 text-xs text-gray-500 line-clamp-2">${item.note}</p>` : ''}
                             </div>
-
-                            <!-- Plan B (Auto Wrap) -->
+                            
+                            <!-- Plan B -->
                             ${item.hasBackup ? `
                             <div class="w-full h-px bg-gray-100 sm:w-px sm:h-auto sm:bg-gray-200"></div>
                             <div class="flex-1 sm:max-w-[140px] min-w-[120px] bg-gray-50 rounded-lg p-2 border border-dashed border-gray-300 self-stretch flex flex-col justify-center">
-                                <span class="text-[9px] text-gray-400 font-bold uppercase mb-0.5">Plan B 備案</span>
+                                <span class="text-[9px] text-gray-400 font-bold uppercase mb-0.5">Plan B</span>
                                 <h5 class="font-bold text-gray-600 text-sm leading-tight mb-1 break-words">${item.backupTitle}</h5>
                                 ${item.backupLocation ? `
                                 <a href="${backupMapLink}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] text-gray-500 flex items-center gap-1 underline decoration-gray-300">
                                     <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i> 地圖
                                 </a>` : ''}
-                            </div>
-                            ` : ''}
+                            </div>` : ''}
                          </div>
                     </div>`;
                 container.appendChild(el);
             });
             lucide.createIcons();
+            
+            // Run live check immediately after render
+            updateLiveIndicator();
         }
 
-        // --- Swipe Logic ---
+        // --- Swipe ---
         let touchStartX = 0;
         let touchCurrentX = 0;
         let isSwiping = false;
-
-        function handleTouchStart(e, el) {
-            touchStartX = e.touches[0].clientX;
-            el.style.transition = 'none';
-        }
+        function handleTouchStart(e, el) { touchStartX = e.touches[0].clientX; el.style.transition = 'none'; }
         function handleTouchMove(e, el) {
             touchCurrentX = e.touches[0].clientX;
             const diff = touchCurrentX - touchStartX;
-            if (diff > 0 && diff < el.clientWidth * 0.4) { 
-                e.preventDefault();
-                isSwiping = true;
-                el.style.transform = `translateX(${diff}px)`;
-            }
+            if (diff > 0 && diff < el.clientWidth * 0.4) { e.preventDefault(); isSwiping = true; el.style.transform = `translateX(${diff}px)`; }
         }
         function handleTouchEnd(e, el, id, type) {
             el.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -560,13 +630,11 @@
                     if (type === 'item') deleteItem(id);
                     if (type === 'shop') deleteShopItem(id);
                 }, 200);
-            } else {
-                el.style.transform = `translateX(0)`;
-            }
+            } else { el.style.transform = `translateX(0)`; }
             isSwiping = false; touchStartX = 0; touchCurrentX = 0;
         }
 
-        // --- Modal & Data Ops ---
+        // --- CRUD ---
         function openAddTripModal() {
             document.getElementById('modal-trip').classList.remove('hidden');
             tempDaysCount = 3;
@@ -591,7 +659,6 @@
         }
         function deleteTrip(id) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); }
 
-        // Item Ops
         function togglePlanBInputs() {
             const checked = document.getElementById('has-plan-b').checked;
             const container = document.getElementById('plan-b-inputs');
@@ -638,18 +705,13 @@
             const hasBackup = document.getElementById('has-plan-b').checked;
             const backupTitle = document.getElementById('backup-title').value.trim();
             const backupLocation = document.getElementById('backup-location').value.trim();
-
             if (!title) return alert('請輸入標題');
-            
             const trip = getTrip(currentTripId);
             const newItem = { id: editingItemId || generateId(), time, title, type, location, cost, note, hasBackup, backupTitle, backupLocation };
-            
             if (editingItemId) {
                 const idx = trip.days[currentDayIndex].items.findIndex(i => i.id === editingItemId);
                 if (idx > -1) trip.days[currentDayIndex].items[idx] = newItem;
-            } else {
-                trip.days[currentDayIndex].items.push(newItem);
-            }
+            } else { trip.days[currentDayIndex].items.push(newItem); }
             saveData();
             closeModal('modal-item');
             renderTimeline();
@@ -662,8 +724,6 @@
             renderTimeline();
             updateCostDisplay();
         }
-
-        // Days
         function renderDays() {
             const trip = getTrip(currentTripId);
             const container = document.getElementById('day-selector');
@@ -673,7 +733,7 @@
                 const isActive = index === currentDayIndex;
                 btn.className = `flex-none flex flex-col items-center justify-center w-12 h-14 rounded-xl transition-all ${isActive ? 'bg-theme text-white shadow-md' : 'bg-gray-100 text-gray-500'}`;
                 btn.innerHTML = `<span class="text-xs font-bold">D${index + 1}</span><span class="text-[10px]">${getDayName(trip.startDate, index)}</span>`;
-                btn.onclick = () => { currentDayIndex = index; renderDays(); renderTimeline(); };
+                btn.onclick = () => { currentDayIndex = index; renderDays(); renderTimeline(); updateLiveIndicator(); };
                 container.appendChild(btn);
             });
             const addBtn = document.createElement('button');
@@ -682,8 +742,6 @@
             addBtn.onclick = () => { trip.days.push({ items: [] }); saveData(); renderDays(); };
             container.appendChild(addBtn);
         }
-
-        // Shopping
         function renderShopping() {
             const trip = getTrip(currentTripId);
             const container = document.getElementById('shopping-list');
@@ -732,7 +790,6 @@
             saveData();
             renderShopping();
         }
-
         function exportPDF() {
             const trip = getTrip(currentTripId);
             const element = document.getElementById('pdf-target');

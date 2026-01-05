@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 13.1</title>
+    <title>TravelFlow 15.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- html2canvas for Image Export -->
+    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -53,12 +53,11 @@
             z-index: 0;
         }
 
-        /* Swipe Actions (Restored) */
+        /* Swipe Actions */
         .swipe-item-container {
             position: relative;
             overflow: hidden;
-            touch-action: pan-y; /* Crucial for vertical scroll */
-            user-select: none;
+            touch-action: pan-y;
         }
         .swipe-content {
             position: relative;
@@ -70,7 +69,7 @@
         .swipe-action-bg {
             position: absolute;
             inset: 0;
-            background-color: #ef4444; /* Red */
+            background-color: #ef4444;
             z-index: 1;
             display: flex;
             align-items: center;
@@ -84,25 +83,22 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Pinned Item Style */
+        /* Pinned & Active Styles */
         .pinned-item-card {
-            border: 2px solid #fbbf24 !important; /* Amber-400 */
-            background-color: #fffbeb !important; /* Amber-50 */
+            background-color: #fffbeb !important;
+            border: 1px solid #fbbf24 !important;
         }
-
-        /* Active Item Pulse (Restored) */
+        
         @keyframes pulse-border {
-            0% { box-shadow: -4px 0 0 0 var(--color-main); }
-            50% { box-shadow: -4px 0 0 4px rgba(13, 148, 136, 0.2); }
-            100% { box-shadow: -4px 0 0 0 var(--color-main); }
+            0% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
         }
         .active-item-card {
-            /* Use box-shadow for left border effect to avoid layout shift */
-            box-shadow: -4px 0 0 0 var(--color-main); 
+            border-left: 4px solid var(--color-main) !important;
             animation: pulse-border 2s infinite;
         }
 
-        /* Pie Chart */
         .pie-chart {
             width: 120px;
             height: 120px;
@@ -118,7 +114,7 @@
             border-radius: 50%;
         }
 
-        /* Modal Center Fix */
+        /* Modal & Layout */
         .modal-overlay {
             position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); z-index: 50;
             display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem;
@@ -129,69 +125,41 @@
             max-height: 85vh; margin: 0 auto; position: relative;
         }
 
-        /* Gallery Grid */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-        }
-        .gallery-item {
-            aspect-ratio: 1 / 1;
-            position: relative;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background-color: #f9fafb;
-        }
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        .gallery-item { aspect-ratio: 1 / 1; position: relative; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .shop-img-preview { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-    <!-- App Container -->
     <div id="app" class="w-full h-full bg-white flex flex-col relative overflow-hidden">
         
-        <!-- ==================== VIEW: HOME ==================== -->
+        <!-- VIEW: HOME -->
         <div id="view-home" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-gray-50 z-10 transition-transform duration-300">
             <header class="bg-white p-4 shadow-sm z-20 flex justify-between items-center shrink-0">
                 <div>
-                    <h1 class="text-2xl font-bold text-theme flex items-center gap-2">
-                        <i data-lucide="plane" class="w-6 h-6"></i> TravelFlow
-                    </h1>
-                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v13.0)</p>
+                    <h1 class="text-2xl font-bold text-theme flex items-center gap-2"><i data-lucide="plane" class="w-6 h-6"></i> TravelFlow</h1>
+                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v15.0)</p>
                 </div>
-                <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100">
-                    <i data-lucide="settings" class="w-6 h-6"></i>
-                </button>
+                <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100"><i data-lucide="settings" class="w-6 h-6"></i></button>
             </header>
-            
-            <div class="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-2xl mx-auto" id="trip-list-container">
-                <!-- Trip cards injected here -->
-            </div>
-
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-2xl mx-auto" id="trip-list-container"></div>
             <div class="p-4 bg-white border-t border-gray-100 shrink-0 pb-safe">
-                <button onclick="openAddTripModal()" class="w-full max-w-2xl mx-auto bg-theme text-white font-medium py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95">
-                    <i data-lucide="plus-circle" class="w-5 h-5"></i> 新增旅行
-                </button>
+                <button onclick="openAddTripModal()" class="w-full max-w-2xl mx-auto bg-theme text-white font-medium py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95"><i data-lucide="plus-circle" class="w-5 h-5"></i> 新增旅行</button>
             </div>
         </div>
 
-        <!-- ==================== VIEW: DETAIL ==================== -->
+        <!-- VIEW: DETAIL -->
         <div id="view-detail" class="flex-1 flex flex-col w-full h-full absolute inset-0 bg-white z-20 translate-x-full transition-transform duration-300">
-            <!-- Header -->
             <header class="bg-theme text-white p-3 shadow-md z-30 shrink-0 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-2 relative z-10">
-                    <button onclick="goBack()" class="p-2 -ml-1 rounded-full active:bg-white/20 transition">
-                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                    </button>
+                    <button onclick="goBack()" class="p-2 -ml-1 rounded-full active:bg-white/20 transition"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
                     <div class="text-center flex-1 mx-2 overflow-hidden px-2">
                         <h2 id="detail-title" class="font-bold text-lg truncate leading-tight">Title</h2>
                         <span id="detail-cost" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full inline-block mt-0.5 font-mono">總花費: NT$ 0</span>
                     </div>
-                    <button onclick="shareAsImage()" class="p-2 -mr-1 rounded-full active:bg-white/20 transition" title="分享長條圖">
-                        <i data-lucide="share-2" class="w-5 h-5"></i>
-                    </button>
+                    <button onclick="shareAsImage()" class="p-2 -mr-1 rounded-full active:bg-white/20 transition"><i data-lucide="share-2" class="w-5 h-5"></i></button>
                 </div>
-                <!-- Tabs -->
                 <div class="flex bg-black/10 rounded-lg p-1 max-w-md mx-auto w-full relative z-10">
                     <button onclick="switchTab('itinerary')" id="tab-itinerary" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition">行程</button>
                     <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">圖表/購物</button>
@@ -199,40 +167,29 @@
                 </div>
             </header>
 
-            <!-- Content Area -->
             <div class="flex-1 overflow-hidden relative w-full mx-auto bg-gray-50">
-                
                 <!-- Tab 1: Itinerary -->
                 <div id="content-itinerary" class="absolute inset-0 flex flex-col w-full max-w-3xl mx-auto">
-                    <!-- Search & Days -->
                     <div class="bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100 shrink-0">
                         <div class="p-2 pb-0">
                             <div class="relative">
                                 <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                                <input type="text" id="search-input" onkeyup="renderTimeline()" placeholder="搜尋行程 (如: 拉麵)..." class="w-full bg-gray-100 pl-9 pr-3 py-2 rounded-lg text-sm focus:ring-1 focus:ring-theme outline-none">
+                                <input type="text" id="search-input" onkeyup="renderTimeline()" placeholder="搜尋行程..." class="w-full bg-gray-100 pl-9 pr-3 py-2 rounded-lg text-sm focus:ring-1 focus:ring-theme outline-none">
                             </div>
                         </div>
-                        <div class="flex overflow-x-auto no-scrollbar p-2 gap-2" id="day-selector">
-                            <!-- Days -->
-                        </div>
+                        <div class="flex overflow-x-auto no-scrollbar p-2 gap-2" id="day-selector"></div>
                     </div>
-
-                    <!-- Timeline -->
                     <div class="flex-1 overflow-y-auto pb-20 scroll-smooth relative" id="capture-target">
-                        <div id="timeline-container" class="p-4 relative min-h-[300px]">
-                            <!-- Timeline items -->
-                        </div>
+                        <div id="timeline-container" class="p-4 relative min-h-[300px]"></div>
                         <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                            <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
-                            <p class="text-sm">沒有符合的行程</p>
+                            <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i><p class="text-sm">沒有行程</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab 2: Shopping (Cleanup: Removed fixed input, rely on FAB) -->
+                <!-- Tab 2: Shopping -->
                 <div id="content-shopping" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20 w-full">
                     <div class="w-full max-w-lg mx-auto">
-                        <!-- Chart -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 flex items-center justify-between">
                             <div class="relative w-[120px] h-[120px] shrink-0">
                                 <div id="budget-pie" class="pie-chart"></div>
@@ -243,21 +200,19 @@
                             </div>
                             <div class="flex-1 pl-4 space-y-1.5" id="chart-legend"></div>
                         </div>
-
-                        <!-- Toggle -->
+                        
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-gray-700">戰利品與記帳</h3>
+                            <h3 class="font-bold text-gray-700">戰利品</h3>
                             <div class="flex bg-gray-200 rounded-lg p-0.5">
                                 <button onclick="setGalleryMode(false)" id="btn-list-view" class="p-1.5 rounded-md bg-white shadow-sm"><i data-lucide="list" class="w-4 h-4"></i></button>
                                 <button onclick="setGalleryMode(true)" id="btn-grid-view" class="p-1.5 rounded-md text-gray-500"><i data-lucide="grid" class="w-4 h-4"></i></button>
                             </div>
                         </div>
                         
-                        <!-- List/Grid -->
                         <div id="shopping-list" class="w-full"></div>
                         <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-10 text-gray-400">
-                            <i data-lucide="shopping-bag" class="w-12 h-12 mb-2 opacity-30"></i>
-                            <p class="text-sm">尚無紀錄，點擊右下角「+」新增</p>
+                            <i data-lucide="shopping-bag" class="w-12 h-12 mb-2 opacity-30"></i><p class="text-sm">尚無紀錄</p>
+                            <p class="text-xs text-gray-300 mt-1">點擊右下角 + 新增</p>
                         </div>
                     </div>
                 </div>
@@ -267,8 +222,7 @@
                     <div class="w-full max-w-lg mx-auto">
                         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                             <div class="p-4 border-b border-gray-100 bg-teal-50 flex justify-between items-center">
-                                <h3 class="font-bold text-teal-800">行李檢查清單</h3>
-                                <span id="packing-progress" class="text-xs font-bold text-teal-600">0/0</span>
+                                <h3 class="font-bold text-teal-800">行李清單</h3><span id="packing-progress" class="text-xs font-bold text-teal-600">0/0</span>
                             </div>
                             <div class="p-2 bg-gray-50 border-b border-gray-100 flex gap-2">
                                 <input type="text" id="new-pack-item" placeholder="新增物品..." class="flex-1 p-2 rounded-lg border-none focus:ring-1 focus:ring-theme text-sm">
@@ -282,31 +236,27 @@
 
             <!-- Floating Action Button -->
             <div id="fab-container" class="absolute bottom-6 right-6 z-40 pb-safe">
-                <button id="fab-btn" onclick="handleFabClick()" class="bg-theme text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition active:scale-90 active:rotate-90">
-                    <i data-lucide="plus" class="w-8 h-8"></i>
-                </button>
+                <button id="fab-btn" onclick="handleFabClick()" class="bg-theme text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition active:scale-90 active:rotate-90"><i data-lucide="plus" class="w-8 h-8"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MODALS ==================== -->
-    
-    <!-- Settings -->
+    <!-- MODAL: Settings -->
     <div id="modal-settings" class="modal-overlay hidden">
         <div class="modal-container-center">
             <div class="p-6 h-full flex flex-col">
                 <h3 class="text-lg font-bold text-gray-800 mb-4">設定</h3>
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">主題</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">主題</label>
                     <div class="flex gap-4 justify-center">
-                        <button onclick="setTheme('teal')" class="w-8 h-8 rounded-full bg-teal-600"></button>
-                        <button onclick="setTheme('rose')" class="w-8 h-8 rounded-full bg-rose-500"></button>
-                        <button onclick="setTheme('blue')" class="w-8 h-8 rounded-full bg-blue-600"></button>
+                        <button onclick="setTheme('teal')" class="w-8 h-8 rounded-full bg-teal-600 ring-2 ring-transparent focus:ring-teal-200"></button>
+                        <button onclick="setTheme('rose')" class="w-8 h-8 rounded-full bg-rose-500 ring-2 ring-transparent focus:ring-rose-200"></button>
+                        <button onclick="setTheme('blue')" class="w-8 h-8 rounded-full bg-blue-600 ring-2 ring-transparent focus:ring-blue-200"></button>
                     </div>
                 </div>
                 <div class="mb-2 flex-1 overflow-y-auto">
                     <div class="flex justify-between items-center mb-2">
-                        <label class="block text-xs font-bold text-gray-400 uppercase">匯率</label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase">匯率 (對台幣)</label>
                         <button onclick="fetchRealTimeRates()" class="text-[10px] bg-gray-100 px-2 py-1 rounded text-theme flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i></button>
                     </div>
                     <div class="space-y-2 text-sm">
@@ -316,12 +266,12 @@
                         <div class="flex justify-between"><span class="font-bold text-gray-600">EUR</span><input type="number" id="rate-EUR" step="0.1" onchange="updateRate('EUR',this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right"></div>
                     </div>
                 </div>
-                <button onclick="closeModal('modal-settings')" class="w-full py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200">完成</button>
+                <button onclick="closeModal('modal-settings')" class="w-full py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200 shrink-0">完成</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Trip -->
+    <!-- MODAL: Add Trip -->
     <div id="modal-trip" class="modal-overlay hidden">
         <div class="modal-container-center">
             <div class="p-6 h-full flex flex-col">
@@ -343,7 +293,7 @@
         </div>
     </div>
 
-    <!-- Itinerary Item -->
+    <!-- MODAL: Itinerary Item -->
     <div id="modal-item" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center sm:p-4 backdrop-blur-sm">
         <div class="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col animate-slide-up">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
@@ -352,19 +302,29 @@
             </div>
             <div class="p-5 modal-body-scroll space-y-5">
                 <div class="flex gap-3">
+                    <div class="w-1/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">第幾天</label><select id="item-day-select" class="w-full p-3 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-theme"></select></div>
                     <div class="w-1/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">時間</label><input type="time" id="item-time" class="w-full p-3 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-theme"></div>
-                    <div class="w-2/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">類型</label><select id="item-type" class="w-full p-3 bg-gray-50 rounded-xl outline-none bg-white border border-gray-200"><option value="spot">📍 景點</option><option value="food">🍴 餐廳</option><option value="transport">🚌 交通</option><option value="stay">🛏️ 住宿</option><option value="flight">✈️ 航班</option></select></div>
+                    <div class="w-1/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">類型</label><select id="item-type" class="w-full p-3 bg-gray-50 rounded-xl outline-none bg-white border border-gray-200"><option value="spot">📍 景點</option><option value="food">🍴 餐廳</option><option value="transport">🚌 交通</option><option value="stay">🛏️ 住宿</option><option value="flight">✈️ 航班</option></select></div>
                 </div>
-                <div class="flex items-center gap-2"><input type="checkbox" id="item-pinned" class="w-5 h-5 accent-yellow-400 rounded"><label for="item-pinned" class="text-sm font-bold text-gray-700 flex items-center gap-1">標示為重點行程 <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i></label></div>
+                
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="item-pinned" class="w-5 h-5 accent-yellow-400 rounded">
+                    <label for="item-pinned" class="text-sm font-bold text-gray-700 flex items-center gap-1">標示為重點 <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i></label>
+                </div>
+                
                 <div class="p-4 border border-gray-100 rounded-2xl relative shadow-sm">
                     <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">主要行程</span>
                     <input type="text" id="item-title" placeholder="要做什麼？" class="w-full p-2 mb-2 font-medium text-lg border-b border-gray-100 outline-none">
                     <div class="flex items-center gap-2 mb-2"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i><input type="text" id="item-location" placeholder="地點" class="w-full p-1 text-sm outline-none"></div>
                     <div class="flex items-center gap-2"><select id="item-currency" class="text-xs font-bold text-gray-500 bg-gray-100 rounded p-1 outline-none"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option></select><input type="number" id="item-cost" placeholder="費用" class="w-full p-1 text-sm outline-none"></div>
                 </div>
+                
                 <div class="border border-dashed border-gray-300 rounded-2xl p-4 bg-gray-50">
                     <label class="flex items-center gap-2 text-sm font-bold text-gray-600"><input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded"> 啟用備案 (Plan B)</label>
-                    <div id="plan-b-inputs" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-200"><input type="text" id="backup-title" placeholder="備案標題..." class="w-full p-2 bg-white rounded-lg text-sm border border-gray-200 shadow-sm"><div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i><input type="text" id="backup-location" placeholder="備案地點" class="w-full p-1 bg-transparent text-sm outline-none"></div></div>
+                    <div id="plan-b-inputs" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-200">
+                        <input type="text" id="backup-title" placeholder="備案標題..." class="w-full p-2 bg-white rounded-lg text-sm border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i><input type="text" id="backup-location" placeholder="備案地點" class="w-full p-1 bg-transparent text-sm outline-none"></div>
+                    </div>
                 </div>
                 <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">備註</label><textarea id="item-note" rows="3" placeholder="詳細資訊..." class="w-full p-3 bg-gray-50 rounded-xl outline-none resize-none text-sm border border-transparent focus:border-theme"></textarea></div>
                 <div class="h-4"></div>
@@ -375,7 +335,7 @@
         </div>
     </div>
 
-    <!-- Modal: Shop -->
+    <!-- MODAL: Shop (Fixed Location Input & Logic) -->
     <div id="modal-shop" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center sm:p-4 backdrop-blur-sm">
         <div class="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col animate-slide-up">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
@@ -386,25 +346,26 @@
                 <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">物品</label><input type="text" id="shop-name" placeholder="買了什麼？" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div>
                 <div class="flex gap-3">
                     <div class="w-1/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">幣種</label><select id="shop-currency" class="w-full p-3 bg-gray-50 rounded-xl outline-none bg-white border border-gray-200"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option></select></div>
-                    <div class="w-2/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">金額</label><input type="number" id="shop-price" placeholder="0" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div>
+                    <div class="w-2/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">金額</label><input type="number" id="shop-price" placeholder="" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div>
                 </div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">地點</label><div class="relative"><i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i><input type="text" id="shop-location" placeholder="在哪裡買的？" class="w-full p-3 pl-10 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div></div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">照片 (自動壓縮)</label><div class="flex items-center gap-4"><label class="flex-1 h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition relative overflow-hidden"><input type="file" id="shop-photo" accept="image/*" class="hidden" onchange="handleImageUpload(this)"><div id="shop-photo-placeholder" class="text-center"><i data-lucide="camera" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i><span class="text-xs text-gray-500">點擊上傳</span></div><img id="shop-photo-preview" class="absolute inset-0 w-full h-full object-cover hidden"></label><button onclick="clearShopImage()" class="p-2 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div></div>
+                <!-- ADDED BACK LOCATION INPUT -->
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">購買地點</label><div class="relative"><i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i><input type="text" id="shop-location" placeholder="地點 (如: Donki)" class="w-full p-3 pl-10 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div></div>
+                
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">照片</label><div class="flex items-center gap-4"><label class="flex-1 h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition relative overflow-hidden"><input type="file" id="shop-photo" accept="image/*" class="hidden" onchange="handleImageUpload(this)"><div id="shop-photo-placeholder" class="text-center"><i data-lucide="camera" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i><span class="text-xs text-gray-500">點擊上傳</span></div><img id="shop-photo-preview" class="absolute inset-0 w-full h-full object-cover hidden"></label><button onclick="clearShopImage()" class="p-2 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-white pb-safe shrink-0">
-                <button onclick="saveShopItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">儲存</button>
+                <button onclick="saveShopItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">加入</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Init ---
         const THEMES = { teal: { main: '#0d9488', light: '#f0fdfa' }, rose: { main: '#e11d48', light: '#fff1f2' }, blue: { main: '#2563eb', light: '#eff6ff' } };
         let defaultRates = { TWD: 1, JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.2, HKD: 4.05 };
-        let defaultPacking = ["護照", "身分證", "現金/信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "網卡/Wifi機", "雨傘/雨衣"];
+        let defaultPacking = ["護照", "身分證", "現金/信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "網卡/Wifi機", "雨傘/雨衣", "面紙/濕紙巾"];
 
-        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v13')) || [];
-        let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings_v13')) || { theme: 'teal', rates: defaultRates };
+        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v15')) || [];
+        let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings_v15')) || { theme: 'teal', rates: defaultRates };
         
         let currentTripId = null;
         let currentDayIndex = 0;
@@ -425,20 +386,20 @@
             fetchRealTimeRates();
         });
 
-        // --- Helpers ---
+        // --- Core ---
         function applyTheme(themeName) {
             const theme = THEMES[themeName] || THEMES.teal;
             const root = document.documentElement;
             root.style.setProperty('--color-main', theme.main);
             root.style.setProperty('--color-light', theme.light);
             appSettings.theme = themeName;
-            localStorage.setItem('travelFlow_settings_v13', JSON.stringify(appSettings));
+            localStorage.setItem('travelFlow_settings_v15', JSON.stringify(appSettings));
         }
         function setTheme(name) { applyTheme(name); renderHome(); if(currentTripId) renderTimeline(); }
         function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-        function saveData() { localStorage.setItem('travelFlow_trips_v13', JSON.stringify(trips)); }
+        function saveData() { localStorage.setItem('travelFlow_trips_v15', JSON.stringify(trips)); }
         function getTrip(id) { return trips.find(t => t.id === id); }
         function getDayName(dateStr, addDays) { const date = new Date(dateStr); date.setDate(date.getDate() + addDays); return ['日','一','二','三','四','五','六'][date.getDay()]; }
         
@@ -447,7 +408,7 @@
                 if (data && data.rates) {
                     appSettings.rates.JPY = 1 / data.rates.JPY; appSettings.rates.USD = 1 / data.rates.USD;
                     appSettings.rates.KRW = 1 / data.rates.KRW; appSettings.rates.EUR = 1 / data.rates.EUR;
-                    localStorage.setItem('travelFlow_settings_v13', JSON.stringify(appSettings)); loadRatesToModal(); updateCostDisplay();
+                    localStorage.setItem('travelFlow_settings_v15', JSON.stringify(appSettings)); loadRatesToModal(); updateCostDisplay();
                 }
             } catch (e) {}
         }
@@ -458,47 +419,60 @@
             document.getElementById('rate-KRW').value = parseFloat(appSettings.rates.KRW).toFixed(4);
             document.getElementById('rate-EUR').value = parseFloat(appSettings.rates.EUR).toFixed(2);
         }
-        function updateRate(curr, val) { appSettings.rates[curr] = parseFloat(val); localStorage.setItem('travelFlow_settings_v13', JSON.stringify(appSettings)); updateCostDisplay(); }
+        function updateRate(curr, val) { appSettings.rates[curr] = parseFloat(val); localStorage.setItem('travelFlow_settings_v15', JSON.stringify(appSettings)); updateCostDisplay(); }
         function convertToTWD(amount, currency) { if (!amount) return 0; const rate = appSettings.rates[currency] || 1; return Math.round(amount * rate); }
+
         function calculateTotalCost(trip) {
             let totalTWD = 0;
-            if (trip.days) trip.days.forEach(d => d.items.forEach(i => totalTWD += convertToTWD(parseInt(i.cost), i.currency || 'TWD')));
+            if (trip.days) trip.days.forEach(d => { if(d.items) d.items.forEach(i => totalTWD += convertToTWD(parseInt(i.cost), i.currency || 'TWD')) });
             if (trip.shoppingList) trip.shoppingList.forEach(i => { if (i.price) totalTWD += convertToTWD(parseInt(i.price), i.currency || 'TWD'); });
             return totalTWD;
+        }
+
+        function updatePieChart() {
+            const trip = getTrip(currentTripId); if (!trip) return;
+            const categories = { '購物': 0, '飲食': 0, '交通': 0, '住宿': 0, '景點': 0, '其他': 0 };
+            trip.days.forEach(d => { if(d.items) d.items.forEach(i => {
+                const cost = convertToTWD(parseInt(i.cost), i.currency || 'TWD');
+                if (i.type === 'food') categories['飲食'] += cost; else if (i.type === 'transport') categories['交通'] += cost; else if (i.type === 'stay') categories['住宿'] += cost; else if (i.type === 'spot') categories['景點'] += cost; else categories['其他'] += cost;
+            })});
+            if (trip.shoppingList) trip.shoppingList.forEach(i => { if (i.price) categories['購物'] += convertToTWD(parseInt(i.price), i.currency || 'TWD'); });
+            const total = Object.values(categories).reduce((a,b)=>a+b, 0);
+            document.getElementById('chart-total').innerText = total > 0 ? '$' + (total/1000).toFixed(1) + 'k' : '0';
+            const colors = { '購物': '#f472b6', '飲食': '#fb923c', '交通': '#6366f1', '住宿': '#a855f7', '景點': '#22c55e', '其他': '#94a3b8' };
+            let gradientStr = '', currentDeg = 0, legendHtml = '';
+            for (const [cat, val] of Object.entries(categories)) {
+                if (val > 0) { const percent = val / total; const deg = percent * 360; gradientStr += `${colors[cat]} ${currentDeg}deg ${currentDeg + deg}deg, `; currentDeg += deg; legendHtml += `<div class="flex items-center justify-between text-xs text-gray-600"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${colors[cat]}"></span>${cat}</span><span>${Math.round(percent*100)}%</span></div>`; }
+            }
+            if (!gradientStr) gradientStr = '#f3f4f6 0deg 360deg'; else gradientStr = gradientStr.slice(0, -2);
+            const chart = document.getElementById('budget-pie'); if(chart) { chart.style.setProperty('--pie-gradient', gradientStr); document.getElementById('chart-legend').innerHTML = legendHtml; }
         }
 
         // --- Navigation ---
         function openTrip(id) {
             currentTripId = id; const trip = getTrip(id);
             if (!trip.packingList) { trip.packingList = defaultPacking.map(text => ({ id: generateId(), text, checked: false })); saveData(); }
+            if (!trip.days) trip.days = [];
             switchTab('itinerary');
             document.getElementById('detail-title').innerText = trip.title;
             updateCostDisplay();
             document.getElementById('view-detail').classList.remove('translate-x-full');
-            renderDays(); renderTimeline(); renderShopping(); renderPacking(); updatePieChart(); startLiveTracking();
+            currentDayIndex = 0; renderDays(); renderTimeline(); renderShopping(); renderPacking(); updatePieChart(); startLiveTracking();
         }
-        function goBack() {
-            document.getElementById('view-detail').classList.add('translate-x-full'); stopLiveTracking();
-            setTimeout(() => { currentTripId = null; renderHome(); activeTab = 'home'; }, 300);
+        function goBack() { 
+            document.getElementById('view-detail').classList.add('translate-x-full'); 
+            stopLiveTracking();
+            setTimeout(() => { currentTripId = null; renderHome(); activeTab = 'home'; }, 300); 
         }
         function switchTab(tab) {
             activeTab = tab;
-            ['itinerary','shopping','packing'].forEach(t => {
-                document.getElementById(`content-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
-            });
-            document.getElementById(`content-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
+            ['itinerary','shopping','packing'].forEach(t => { document.getElementById(`content-${t}`).classList.add('hidden'); document.getElementById(`tab-${t}`).className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition"; });
+            document.getElementById(`content-${tab}`).classList.remove('hidden'); document.getElementById(`tab-${tab}`).className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
             document.getElementById('fab-container').classList.toggle('hidden', false);
             if (tab === 'shopping') updatePieChart();
-            if (tab === 'itinerary') startLiveTracking(); else stopLiveTracking();
         }
-        function updateCostDisplay() {
-            const trip = getTrip(currentTripId); const total = calculateTotalCost(trip);
-            document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`;
-        }
+        function updateCostDisplay() { const trip = getTrip(currentTripId); const total = calculateTotalCost(trip); document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`; }
 
-        // --- Fab Logic ---
         function handleFabClick() {
             if (activeTab === 'itinerary') openAddItemModal();
             else if (activeTab === 'shopping') openAddShopModal();
@@ -509,44 +483,159 @@
             }
         }
 
-        // --- Shopping (Updated Logic) ---
-        function openAddShopModal() {
-            editingShopId = null;
-            document.getElementById('modal-shop').classList.remove('hidden');
-            document.getElementById('shop-name').value = '';
-            document.getElementById('shop-price').value = '';
-            document.getElementById('shop-currency').value = 'TWD';
-            document.getElementById('shop-location').value = '';
-            clearShopImage();
+        // --- Timeline ---
+        function renderTimeline() {
+            const trip = getTrip(currentTripId); const container = document.getElementById('timeline-container'); const emptyState = document.getElementById('timeline-empty'); container.innerHTML = '<div class="timeline-line"></div>';
+            const query = document.getElementById('search-input').value.toLowerCase();
+            if (!trip.days[currentDayIndex]) trip.days[currentDayIndex] = { items: [] };
+            const items = trip.days[currentDayIndex].items.filter(i => !query || i.title.toLowerCase().includes(query) || (i.location && i.location.toLowerCase().includes(query)));
+            if (items.length === 0) { emptyState.classList.remove('hidden'); container.classList.add('hidden'); return; }
+            emptyState.classList.add('hidden'); container.classList.remove('hidden');
+            items.sort((a,b)=>a.time.localeCompare(b.time));
+
+            items.forEach(item => {
+                const el = document.createElement('div'); el.className = 'swipe-item-container relative mb-6 pl-9';
+                let iconName='map-pin';let colorClass='bg-blue-500'; if(item.type==='food'){iconName='utensils';colorClass='bg-orange-500'} if(item.type==='transport'){iconName='bus';colorClass='bg-indigo-500'} if(item.type==='stay'){iconName='bed';colorClass='bg-purple-500'} if(item.type==='flight'){iconName='plane';colorClass='bg-sky-500'}
+                
+                const isPinnedClass = item.isPinned ? 'pinned-item-card' : 'border-gray-100';
+                
+                el.innerHTML = `
+                    <div class="absolute left-0 top-1 w-8 h-8 flex items-center justify-center z-10 bg-gray-50"><div class="w-7 h-7 rounded-full ${colorClass} text-white flex items-center justify-center shadow-md border-2 border-white"><i data-lucide="${iconName}" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="relative"><div class="swipe-action-bg rounded-xl"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div>
+                    <div id="card-${item.id}" class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border ${isPinnedClass} flex flex-wrap gap-4 transition-all duration-500" onclick="openEditItemModal('${item.id}')" ontouchstart="handleTouchStart(event,this,'${item.id}','item')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${item.id}','item')">
+                        <div class="flex-1 min-w-[150px]">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>
+                                ${item.isPinned ? '<i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>' : ''}
+                            </div>
+                            <h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>
+                            ${item.location ? `<div class="inline-flex items-center text-xs text-gray-500 gap-1"><i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i><span class="truncate">${item.location}</span></div>` : ''}
+                            ${item.note ? `<p class="mt-2 text-xs text-gray-500 line-clamp-2">${item.note}</p>` : ''}
+                        </div>
+                        ${item.hasBackup ? `<div class="w-full h-px bg-gray-100 sm:w-px sm:h-auto sm:bg-gray-200"></div><div class="flex-1 sm:max-w-[140px] min-w-[120px] bg-gray-50 rounded-lg p-2 border border-dashed border-gray-300 self-stretch flex flex-col justify-center"><span class="text-[9px] text-gray-400 font-bold uppercase mb-0.5">Plan B</span><h5 class="font-bold text-gray-600 text-sm leading-tight mb-1 break-words">${item.backupTitle}</h5></div>` : ''}
+                    </div></div>`;
+                container.appendChild(el);
+            });
+            lucide.createIcons();
+            updateLiveStatus();
         }
+
+        // --- Live Tracking ---
+        function startLiveTracking(){if(liveTrackerInterval)clearInterval(liveTrackerInterval);updateLiveStatus();liveTrackerInterval=setInterval(updateLiveStatus,60000)}
+        function stopLiveTracking(){if(liveTrackerInterval)clearInterval(liveTrackerInterval);document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'))}
+        function updateLiveStatus(){
+            const trip=getTrip(currentTripId);if(!trip)return;
+            const today=new Date();const start=new Date(trip.startDate);start.setHours(0,0,0,0);
+            const viewDate=new Date(start);viewDate.setDate(viewDate.getDate()+currentDayIndex);
+            
+            if(viewDate.toDateString()!==today.toDateString()){
+                document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card')); return;
+            }
+            
+            const nowTime=today.getHours()*60+today.getMinutes();
+            const items=trip.days[currentDayIndex].items;
+            let activeItemId=null;
+            
+            const sortedItems=items.map(i=>{const[h,m]=i.time.split(':').map(Number);return{...i,mins:h*60+m}}).sort((a,b)=>a.mins-b.mins);
+            for(let i=0;i<sortedItems.length;i++){ if(sortedItems[i].mins<=nowTime)activeItemId=sortedItems[i].id; else break; }
+            if(!activeItemId&&sortedItems.length>0){ if(sortedItems[0].mins-nowTime<=60&&sortedItems[0].mins>nowTime)activeItemId=sortedItems[0].id; }
+            
+            document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));
+            if(activeItemId){
+                const el=document.getElementById(`card-${activeItemId}`);
+                if(el) el.classList.add('active-item-card');
+            }
+        }
+
+        // --- Shopping ---
+        function setGalleryMode(enable) {
+            isGalleryMode = enable;
+            document.getElementById('btn-list-view').className = enable ? "p-1.5 rounded-md text-gray-500" : "p-1.5 rounded-md bg-white shadow-sm";
+            document.getElementById('btn-grid-view').className = enable ? "p-1.5 rounded-md bg-white shadow-sm" : "p-1.5 rounded-md text-gray-500";
+            renderShopping();
+        }
+        function renderShopping() {
+            const trip = getTrip(currentTripId); const container = document.getElementById('shopping-list'); const emptyState = document.getElementById('shopping-empty');
+            if (!trip.shoppingList || trip.shoppingList.length === 0) { emptyState.classList.remove('hidden'); container.innerHTML = ''; return; }
+            emptyState.classList.add('hidden');
+            if (isGalleryMode) {
+                container.className = "gallery-grid w-full"; let html = '';
+                trip.shoppingList.forEach(item => {
+                    const img = item.image || 'https://via.placeholder.com/150?text=No+Img';
+                    html += `<div class="gallery-item bg-white" onclick="openEditShopModal('${item.id}')"><img src="${img}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-white backdrop-blur-sm"><p class="text-xs font-bold truncate">${item.text}</p><p class="text-[10px]">${item.price ? item.currency + ' ' + item.price : ''}</p></div></div>`;
+                });
+                container.innerHTML = html;
+            } else {
+                container.className = "space-y-3 w-full"; let html = '';
+                trip.shoppingList.forEach(item => {
+                    html += `<div class="bg-white p-3 rounded-xl border border-gray-100 flex gap-3 shadow-sm" onclick="openEditShopModal('${item.id}')">${item.image ? `<img src="${item.image}" class="shop-img-preview flex-shrink-0">` : `<div class="shop-img-preview bg-gray-50 flex items-center justify-center flex-shrink-0"><i data-lucide="shopping-bag" class="w-5 h-5 text-gray-300"></i></div>`}<div class="flex-1 min-w-0"><div class="flex justify-between items-start"><h4 class="font-bold text-gray-800 truncate">${item.text}</h4>${item.price ? `<span class="text-xs font-bold text-theme">${item.currency} ${item.price}</span>` : ''}</div><div class="text-[10px] text-gray-500 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.location || '未標記地點'}</div></div></div>`;
+                });
+                container.innerHTML = html;
+            }
+            lucide.createIcons();
+        }
+
+        // --- Packing ---
+        function renderPacking() {
+            const trip = getTrip(currentTripId); const container = document.getElementById('packing-list-container'); const progress = document.getElementById('packing-progress');
+            const total = trip.packingList.length; const checked = trip.packingList.filter(i => i.checked).length; progress.innerText = `${checked}/${total}`;
+            container.innerHTML = '';
+            trip.packingList.forEach(item => {
+                const el = document.createElement('div'); el.className = "p-3 flex items-center justify-between group hover:bg-gray-50 transition";
+                el.innerHTML = `<div class="flex items-center gap-3 cursor-pointer" onclick="togglePackItem('${item.id}')"><div class="w-5 h-5 rounded border ${item.checked ? 'bg-teal-500 border-teal-500' : 'border-gray-300'} flex items-center justify-center text-white transition">${item.checked ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}</div><span class="${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 font-medium'}">${item.text}</span></div><button onclick="deletePackItem('${item.id}')" class="text-gray-300 hover:text-red-400 p-1"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+                container.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+        function togglePackItem(id) { const trip = getTrip(currentTripId); const item = trip.packingList.find(i => i.id === id); if(item) { item.checked = !item.checked; saveData(); renderPacking(); }}
+        function deletePackItem(id) { const trip = getTrip(currentTripId); trip.packingList = trip.packingList.filter(i => i.id !== id); saveData(); renderPacking(); }
+        function addPackItem() { const input = document.getElementById('new-pack-item'); const val = input.value.trim(); if(val) { const trip = getTrip(currentTripId); trip.packingList.push({ id: generateId(), text: val, checked: false }); saveData(); renderPacking(); input.value = ''; } }
+
+        // --- Modals & CRUD ---
+        function openAddTripModal() { document.getElementById('modal-trip').classList.remove('hidden'); tempDaysCount = 3; document.getElementById('display-days-count').innerText = tempDaysCount + ' 天'; document.getElementById('input-trip-name').value = ''; }
+        function adjustDays(d) { tempDaysCount += d; if(tempDaysCount < 1) tempDaysCount = 1; document.getElementById('display-days-count').innerText = tempDaysCount + ' 天'; }
+        function saveNewTrip() {
+            const title = document.getElementById('input-trip-name').value.trim(); const date = document.getElementById('input-trip-date').value;
+            if (!title || !date) return alert('請填寫完整資訊');
+            const newTrip = { id: generateId(), title, startDate: date, createdAt: new Date().toISOString(), shoppingList: [], packingList: [], days: [] };
+            for(let i=0; i<tempDaysCount; i++) newTrip.days.push({ items: [] });
+            trips.push(newTrip); saveData(); renderHome(); closeModal('modal-trip');
+        }
+        function deleteTrip(id) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); }
+
+        function generateDayOptions(trip, selectedIndex) {
+            let html = ''; trip.days.forEach((day, idx) => { html += `<option value="${idx}" ${idx === selectedIndex ? 'selected' : ''}>Day ${idx + 1}</option>`; }); return html;
+        }
+        function openAddItemModal() { 
+            editingItemId = null; const trip = getTrip(currentTripId);
+            document.getElementById('modal-item').classList.remove('hidden'); 
+            document.getElementById('item-day-select').innerHTML = generateDayOptions(trip, currentDayIndex);
+            document.getElementById('item-time').value = '09:00'; document.getElementById('item-title').value = ''; document.getElementById('item-location').value = ''; document.getElementById('item-cost').value = ''; document.getElementById('item-currency').value = 'TWD'; document.getElementById('item-note').value = ''; document.getElementById('has-plan-b').checked = false; document.getElementById('item-pinned').checked = false; togglePlanBInputs(); document.getElementById('backup-title').value = ''; document.getElementById('backup-location').value = ''; 
+        }
+        function openEditItemModal(itemId) {
+            editingItemId = itemId; const trip = getTrip(currentTripId); const item = trip.days[currentDayIndex].items.find(i => i.id === itemId); if (!item) return;
+            document.getElementById('modal-item').classList.remove('hidden'); document.getElementById('item-day-select').innerHTML = generateDayOptions(trip, currentDayIndex); document.getElementById('item-time').value = item.time; document.getElementById('item-title').value = item.title; document.getElementById('item-location').value = item.location || ''; document.getElementById('item-cost').value = item.cost || ''; document.getElementById('item-currency').value = item.currency || 'TWD'; document.getElementById('item-note').value = item.note || ''; document.getElementById('item-type').value = item.type; document.getElementById('has-plan-b').checked = item.hasBackup || false; document.getElementById('item-pinned').checked = item.isPinned || false; togglePlanBInputs(); document.getElementById('backup-title').value = item.backupTitle || ''; document.getElementById('backup-location').value = item.backupLocation || '';
+        }
+        function togglePlanBInputs() { const checked = document.getElementById('has-plan-b').checked; const container = document.getElementById('plan-b-inputs'); if (checked) container.classList.remove('hidden'); else container.classList.add('hidden'); }
+        function saveItem() {
+            const targetDayIdx = parseInt(document.getElementById('item-day-select').value);
+            const time = document.getElementById('item-time').value; const title = document.getElementById('item-title').value.trim(); const type = document.getElementById('item-type').value; const location = document.getElementById('item-location').value.trim(); const cost = document.getElementById('item-cost').value; const currency = document.getElementById('item-currency').value; const note = document.getElementById('item-note').value.trim(); const hasBackup = document.getElementById('has-plan-b').checked; const backupTitle = document.getElementById('backup-title').value.trim(); const backupLocation = document.getElementById('backup-location').value.trim(); const isPinned = document.getElementById('item-pinned').checked;
+            if (!title) return alert('請輸入標題');
+            const trip = getTrip(currentTripId);
+            const newItem = { id: editingItemId || generateId(), time, title, type, location, cost, currency, note, hasBackup, backupTitle, backupLocation, isPinned };
+            if (editingItemId) { 
+                if (targetDayIdx !== currentDayIndex) { trip.days[currentDayIndex].items = trip.days[currentDayIndex].items.filter(i => i.id !== editingItemId); trip.days[targetDayIdx].items.push(newItem); } else { const idx = trip.days[currentDayIndex].items.findIndex(i => i.id === editingItemId); if (idx > -1) trip.days[currentDayIndex].items[idx] = newItem; }
+            } else { trip.days[targetDayIdx].items.push(newItem); }
+            saveData(); closeModal('modal-item'); renderTimeline(); updateCostDisplay(); updatePieChart();
+        }
+        function deleteItem(itemId) { const trip = getTrip(currentTripId); trip.days[currentDayIndex].items = trip.days[currentDayIndex].items.filter(i => i.id !== itemId); saveData(); renderTimeline(); updateCostDisplay(); updatePieChart(); }
+        
+        function openAddShopModal() { editingShopId = null; document.getElementById('modal-shop').classList.remove('hidden'); document.getElementById('shop-name').value = ''; document.getElementById('shop-price').value = ''; document.getElementById('shop-currency').value = 'TWD'; document.getElementById('shop-location').value = ''; clearShopImage(); }
         function openEditShopModal(id) {
             editingShopId = id; const trip = getTrip(currentTripId); const item = trip.shoppingList.find(i => i.id === id); if (!item) return;
-            document.getElementById('modal-shop').classList.remove('hidden');
-            document.getElementById('shop-name').value = item.text;
-            document.getElementById('shop-price').value = item.price;
-            document.getElementById('shop-currency').value = item.currency;
-            document.getElementById('shop-location').value = item.location || '';
+            document.getElementById('modal-shop').classList.remove('hidden'); document.getElementById('shop-name').value = item.text; document.getElementById('shop-price').value = item.price; document.getElementById('shop-currency').value = item.currency; document.getElementById('shop-location').value = item.location || '';
             const preview = document.getElementById('shop-photo-preview'); const placeholder = document.getElementById('shop-photo-placeholder');
             if (item.image) { preview.src = item.image; currentShopImageBase64 = item.image; preview.classList.remove('hidden'); placeholder.classList.add('hidden'); } else { clearShopImage(); }
-        }
-        function saveShopItem() {
-            const text = document.getElementById('shop-name').value.trim();
-            const price = document.getElementById('shop-price').value;
-            const currency = document.getElementById('shop-currency').value;
-            const location = document.getElementById('shop-location').value.trim();
-            if (!text) return alert('請輸入物品名稱');
-            
-            try {
-                const trip = getTrip(currentTripId); if (!trip.shoppingList) trip.shoppingList = [];
-                const newItem = { 
-                    id: editingShopId || generateId(), 
-                    text, price, currency, location, 
-                    image: currentShopImageBase64, 
-                    checked: editingShopId ? trip.shoppingList.find(i => i.id === editingShopId).checked : false 
-                };
-                if (editingShopId) { const idx = trip.shoppingList.findIndex(i => i.id === editingShopId); if (idx > -1) trip.shoppingList[idx] = newItem; } else { trip.shoppingList.push(newItem); }
-                saveData(); closeModal('modal-shop'); renderShopping(); updateCostDisplay(); updatePieChart();
-            } catch (e) { alert('儲存失敗：資料量過大'); }
         }
         function handleImageUpload(input) {
             if (input.files && input.files[0]) {
@@ -564,105 +653,76 @@
         }
         function clearShopImage() { document.getElementById('shop-photo').value = ''; document.getElementById('shop-photo-preview').classList.add('hidden'); document.getElementById('shop-photo-placeholder').classList.remove('hidden'); currentShopImageBase64 = null; }
         
-        function setGalleryMode(enable) {
-            isGalleryMode = enable;
-            document.getElementById('btn-list-view').className = enable ? "p-1.5 rounded-md text-gray-500" : "p-1.5 rounded-md bg-white shadow-sm";
-            document.getElementById('btn-grid-view').className = enable ? "p-1.5 rounded-md bg-white shadow-sm" : "p-1.5 rounded-md text-gray-500";
-            renderShopping();
-        }
-        function renderShopping() {
-            const trip = getTrip(currentTripId); const container = document.getElementById('shopping-list'); const emptyState = document.getElementById('shopping-empty');
-            if (!trip.shoppingList || trip.shoppingList.length === 0) { emptyState.classList.remove('hidden'); container.innerHTML = ''; return; }
-            emptyState.classList.add('hidden');
-            
-            if (isGalleryMode) {
-                container.className = "gallery-grid w-full"; let html = '';
-                trip.shoppingList.forEach(item => {
-                    const img = item.image || 'https://via.placeholder.com/150?text=No+Img';
-                    html += `<div class="gallery-item bg-white" onclick="openEditShopModal('${item.id}')"><img src="${img}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-white backdrop-blur-sm"><p class="text-xs font-bold truncate">${item.text}</p><p class="text-[10px]">${item.price ? item.currency + ' ' + item.price : ''}</p></div></div>`;
-                });
-                container.innerHTML = html;
-            } else {
-                container.className = "space-y-3 w-full"; let html = '';
-                trip.shoppingList.forEach(item => {
-                    const mapLink = item.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}` : '#';
-                    const id = item.id;
-                    html += `
-                        <div class="swipe-item-container rounded-xl overflow-hidden">
-                            <div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
-                            <div class="swipe-content bg-white p-3 border border-gray-100 flex gap-3"
-                                onclick="openEditShopModal('${id}')"
-                                ontouchstart="handleTouchStart(event, this, '${id}', 'shop')" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}', 'shop')">
-                                ${item.image ? `<img src="${item.image}" class="shop-img-preview flex-shrink-0">` : `<div class="shop-img-preview bg-gray-50 flex items-center justify-center flex-shrink-0"><i data-lucide="shopping-bag" class="w-5 h-5 text-gray-300"></i></div>`}
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex justify-between items-start"><h4 class="font-bold text-gray-800 truncate">${item.text}</h4>${item.price ? `<span class="text-xs font-bold text-theme">${item.currency} ${item.price}</span>` : ''}</div>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        ${item.location ? `<a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] text-gray-500 flex items-center gap-0.5 hover:text-theme"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.location}</a>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-                container.innerHTML = html;
-                // Re-bind click event properly if needed, but standard onclick works here
+        function saveShopItem() {
+            try {
+                const text = document.getElementById('shop-name').value.trim();
+                const price = document.getElementById('shop-price').value;
+                const currency = document.getElementById('shop-currency').value;
+                
+                // Fixed: Check for existence before accessing .value to prevent crash
+                const locationInput = document.getElementById('shop-location');
+                const location = locationInput ? locationInput.value.trim() : '';
+
+                if (!text) return alert('請輸入物品名稱');
+                
+                const trip = getTrip(currentTripId); 
+                if (!trip.shoppingList) trip.shoppingList = [];
+                
+                const newItem = { 
+                    id: editingShopId || generateId(), 
+                    text, price, currency, location, 
+                    image: currentShopImageBase64, 
+                    checked: editingShopId ? trip.shoppingList.find(i => i.id === editingShopId).checked : false 
+                };
+                
+                if (editingShopId) { 
+                    const idx = trip.shoppingList.findIndex(i => i.id === editingShopId); 
+                    if (idx > -1) trip.shoppingList[idx] = newItem; 
+                } else { 
+                    trip.shoppingList.push(newItem); 
+                }
+                
+                saveData(); closeModal('modal-shop'); renderShopping(); updateCostDisplay(); updatePieChart();
+            } catch (e) {
+                console.error(e);
+                alert("新增失敗，請檢查欄位或照片是否過大");
             }
-            lucide.createIcons();
         }
-        function deleteShopItem(id) { const trip = getTrip(currentTripId); trip.shoppingList = trip.shoppingList.filter(i => i.id !== id); saveData(); renderShopping(); updateCostDisplay(); updatePieChart(); }
+        
+        function addShopItem() { openAddShopModal(); } 
 
-        // --- Itinerary ---
-        function renderTimeline() {
-            const trip = getTrip(currentTripId); const container = document.getElementById('timeline-container'); const emptyState = document.getElementById('timeline-empty'); container.innerHTML = '<div class="timeline-line"></div>';
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const items = trip.days[currentDayIndex].items.filter(i => !query || i.title.toLowerCase().includes(query) || (i.location && i.location.toLowerCase().includes(query)));
-            if (items.length === 0) { emptyState.classList.remove('hidden'); container.classList.add('hidden'); return; }
-            emptyState.classList.add('hidden'); container.classList.remove('hidden'); items.sort((a,b)=>a.time.localeCompare(b.time));
-            items.forEach(item => {
-                const el = document.createElement('div'); el.className = 'swipe-item-container relative mb-6 pl-9';
-                let iconName='map-pin';let colorClass='bg-blue-500'; if(item.type==='food'){iconName='utensils';colorClass='bg-orange-500'} if(item.type==='transport'){iconName='bus';colorClass='bg-indigo-500'} if(item.type==='stay'){iconName='bed';colorClass='bg-purple-500'} if(item.type==='flight'){iconName='plane';colorClass='bg-sky-500'}
-                const isPinned = item.isPinned ? 'pinned-item-card' : 'border-gray-100';
-                const id = item.id;
-                el.innerHTML = `
-                    <div class="absolute left-0 top-1 w-8 h-8 flex items-center justify-center z-10 bg-gray-50"><div class="w-7 h-7 rounded-full ${colorClass} text-white flex items-center justify-center shadow-md border-2 border-white"><i data-lucide="${iconName}" class="w-3.5 h-3.5"></i></div></div>
-                    <div class="relative"><div class="swipe-action-bg rounded-xl"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div>
-                    <div id="card-${id}" class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border ${isPinned} flex flex-wrap gap-4 transition-all duration-500" onclick="openEditItemModal('${id}')" ontouchstart="handleTouchStart(event,this,'${id}','item')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${id}','item')">
-                        <div class="flex-1 min-w-[150px]">
-                            <div class="flex justify-between items-start mb-1"><span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>${item.isPinned ? '<i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>' : ''}</div>
-                            <h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>
-                            ${item.location ? `<div class="inline-flex items-center text-xs text-gray-500 gap-1"><i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i><span class="truncate">${item.location}</span></div>` : ''}
-                            ${item.note ? `<p class="mt-2 text-xs text-gray-500 line-clamp-2">${item.note}</p>` : ''}
-                        </div>
-                        ${item.hasBackup ? `<div class="w-full h-px bg-gray-100 sm:w-px sm:h-auto sm:bg-gray-200"></div><div class="flex-1 sm:max-w-[140px] min-w-[120px] bg-gray-50 rounded-lg p-2 border border-dashed border-gray-300 self-stretch flex flex-col justify-center"><span class="text-[9px] text-gray-400 font-bold uppercase mb-0.5">Plan B</span><h5 class="font-bold text-gray-600 text-sm leading-tight mb-1 break-words">${item.backupTitle}</h5></div>` : ''}
-                    </div></div>`;
-                container.appendChild(el);
-            });
-            lucide.createIcons(); updateLiveStatus();
+        function renderDays() { 
+            const trip = getTrip(currentTripId); const container = document.getElementById('day-selector'); container.innerHTML = ''; 
+            document.getElementById('search-input').value = '';
+            trip.days.forEach((day, index) => { 
+                const btn = document.createElement('button'); const isActive = index === currentDayIndex; 
+                btn.className = `flex-none flex flex-col items-center justify-center w-12 h-14 rounded-xl transition-all ${isActive ? 'bg-theme text-white shadow-md scale-105' : 'bg-gray-100 text-gray-500 border border-gray-200'}`; 
+                btn.innerHTML = `<span class="text-xs font-bold">D${index + 1}</span><span class="text-[10px]">${getDayName(trip.startDate, index)}</span>`; 
+                btn.onclick = () => { currentDayIndex = index; renderDays(); renderTimeline(); }; container.appendChild(btn); 
+            }); 
+            const addBtn = document.createElement('button'); addBtn.className = "flex-none flex flex-col items-center justify-center w-10 h-14 rounded-xl bg-gray-50 text-gray-300"; addBtn.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i>`; addBtn.onclick = () => { trip.days.push({ items: [] }); saveData(); renderDays(); }; container.appendChild(addBtn); 
         }
-
-        // --- Common ---
+        
         let touchStartX=0,touchCurrentX=0,isSwiping=false;
         function handleTouchStart(e,el){touchStartX=e.touches[0].clientX;el.style.transition='none'}
         function handleTouchMove(e,el){touchCurrentX=e.touches[0].clientX;const diff=touchCurrentX-touchStartX;if(diff>0&&diff<el.clientWidth*0.4){e.preventDefault();isSwiping=true;el.style.transform=`translateX(${diff}px)`}}
         function handleTouchEnd(e,el,id,type){el.style.transition='transform 0.2s cubic-bezier(0.4,0,0.2,1)';const diff=touchCurrentX-touchStartX;if(isSwiping&&diff>100){el.style.transform=`translateX(100%)`;setTimeout(()=>{if(type==='trip')deleteTrip(id);if(type==='item')deleteItem(id);if(type==='shop')deleteShopItem(id)},200)}else{el.style.transform=`translateX(0)`}isSwiping=false;touchStartX=0;touchCurrentX=0}
-        
-        function startLiveTracking(){if(liveTrackerInterval)clearInterval(liveTrackerInterval);updateLiveStatus();liveTrackerInterval=setInterval(updateLiveStatus,60000)}
-        function stopLiveTracking(){if(liveTrackerInterval)clearInterval(liveTrackerInterval);document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'))}
-        function updateLiveStatus(){const trip=getTrip(currentTripId);if(!trip)return;const today=new Date();const start=new Date(trip.startDate);start.setHours(0,0,0,0);const viewDate=new Date(start);viewDate.setDate(viewDate.getDate()+currentDayIndex);if(viewDate.toDateString()!==today.toDateString()){document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));return}const nowTime=today.getHours()*60+today.getMinutes();const items=trip.days[currentDayIndex].items;let activeItemId=null;const sortedItems=items.map(i=>{const[h,m]=i.time.split(':').map(Number);return{...i,mins:h*60+m}}).sort((a,b)=>a.mins-b.mins);for(let i=0;i<sortedItems.length;i++){if(sortedItems[i].mins<=nowTime)activeItemId=sortedItems[i].id;else break}if(!activeItemId&&sortedItems.length>0){if(sortedItems[0].mins-nowTime<=60&&sortedItems[0].mins>nowTime)activeItemId=sortedItems[0].id}document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));if(activeItemId){const el=document.getElementById(`card-${activeItemId}`);if(el)el.classList.add('active-item-card'); el.scrollIntoView({behavior:'smooth',block:'center'});}}
+        function deleteShopItem(id) { const trip = getTrip(currentTripId); trip.shoppingList = trip.shoppingList.filter(i => i.id !== id); saveData(); renderShopping(); updateCostDisplay(); updatePieChart(); }
 
-        // --- Other ---
         function renderHome(){const container=document.getElementById('trip-list-container');container.innerHTML='';if(trips.length===0){container.innerHTML=`<div class="text-center mt-20 opacity-40"><p>尚未建立旅行</p></div>`;return}trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='swipe-item-container rounded-2xl shadow-sm overflow-hidden bg-white';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="swipe-action-bg"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div><div class="swipe-content bg-white p-4 border border-gray-100 flex justify-between items-center relative" onclick="openTrip('${trip.id}')" ontouchstart="handleTouchStart(event,this,'${trip.id}','trip')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${trip.id}','trip')"><div class="overflow-hidden"><h3 class="font-bold text-lg text-gray-800 truncate pr-4">${trip.title}</h3><div class="text-xs text-gray-500 mt-1 flex gap-3"><span><i data-lucide="calendar" class="w-3 h-3 inline"></i> ${dayCount} 天</span><span>NT$ ${totalCost.toLocaleString()}</span></div></div><i data-lucide="chevron-right" class="text-gray-300 w-5 h-5 flex-shrink-0"></i></div>`;container.appendChild(el)});lucide.createIcons()}
-        function updatePieChart() { const trip = getTrip(currentTripId); if (!trip) return; const categories = { '購物': 0, '飲食': 0, '交通': 0, '住宿': 0, '景點': 0, '其他': 0 }; trip.days.forEach(d => d.items.forEach(i => { const cost = convertToTWD(parseInt(i.cost), i.currency || 'TWD'); if (i.type === 'food') categories['飲食'] += cost; else if (i.type === 'transport') categories['交通'] += cost; else if (i.type === 'stay') categories['住宿'] += cost; else if (i.type === 'spot') categories['景點'] += cost; else categories['其他'] += cost; })); if (trip.shoppingList) { trip.shoppingList.forEach(i => { if (i.price) categories['購物'] += convertToTWD(parseInt(i.price), i.currency || 'TWD'); }); } const total = Object.values(categories).reduce((a,b)=>a+b, 0); document.getElementById('chart-total').innerText = total > 0 ? '$' + (total/1000).toFixed(1) + 'k' : '0'; const colors = { '購物': '#f472b6', '飲食': '#fb923c', '交通': '#6366f1', '住宿': '#a855f7', '景點': '#22c55e', '其他': '#94a3b8' }; let gradientStr = ''; let currentDeg = 0; let legendHtml = ''; for (const [cat, val] of Object.entries(categories)) { if (val > 0) { const percent = val / total; const deg = percent * 360; gradientStr += `${colors[cat]} ${currentDeg}deg ${currentDeg + deg}deg, `; currentDeg += deg; legendHtml += `<div class="flex items-center justify-between text-xs text-gray-600"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${colors[cat]}"></span>${cat}</span><span>${Math.round(percent*100)}%</span></div>`; } } if (!gradientStr) gradientStr = '#f3f4f6 0deg 360deg'; else gradientStr = gradientStr.slice(0, -2); const chart = document.getElementById('budget-pie'); if(chart) { chart.style.setProperty('--pie-gradient', gradientStr); document.getElementById('chart-legend').innerHTML = legendHtml; } }
-        function shareAsImage() { const target = document.getElementById('capture-target'); const btn = document.querySelector('button[onclick="shareAsImage()"]'); const originalIcon = btn.innerHTML; btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i>`; lucide.createIcons(); const originalHeight = target.style.height; const originalOverflow = target.style.overflow; target.style.height = 'auto'; target.style.overflow = 'visible'; target.style.backgroundColor = 'white'; html2canvas(target, { scale: 2 }).then(canvas => { const link = document.createElement('a'); link.download = '行程分享.png'; link.href = canvas.toDataURL(); link.click(); target.style.height = originalHeight; target.style.overflow = originalOverflow; target.style.backgroundColor = ''; btn.innerHTML = originalIcon; lucide.createIcons(); }); }
-        
-        // Packing List (Missing in prior v13 snippets)
-        function renderPacking() { const trip = getTrip(currentTripId); const container = document.getElementById('packing-list-container'); const progress = document.getElementById('packing-progress'); const total = trip.packingList.length; const checked = trip.packingList.filter(i => i.checked).length; progress.innerText = `${checked}/${total}`; container.innerHTML = ''; trip.packingList.forEach(item => { const el = document.createElement('div'); el.className = "swipe-item-container"; el.innerHTML = `<div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-3 flex items-center justify-between group bg-white border-b border-gray-50" ontouchstart="handleTouchStart(event,this,'${item.id}','pack')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${item.id}','pack')"><div class="flex items-center gap-3 cursor-pointer" onclick="togglePackItem('${item.id}')"><div class="w-5 h-5 rounded border ${item.checked ? 'bg-teal-500 border-teal-500' : 'border-gray-300'} flex items-center justify-center text-white transition">${item.checked ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}</div><span class="${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 font-medium'}">${item.text}</span></div></div>`; container.appendChild(el); }); lucide.createIcons(); }
-        function togglePackItem(id) { const trip = getTrip(currentTripId); const item = trip.packingList.find(i => i.id === id); if(item) { item.checked = !item.checked; saveData(); renderPacking(); }}
-        function deletePackItem(id) { const trip = getTrip(currentTripId); trip.packingList = trip.packingList.filter(i => i.id !== id); saveData(); renderPacking(); }
-        function addPackItem() { const input = document.getElementById('new-pack-item'); const val = input.value.trim(); if(val) { const trip = getTrip(currentTripId); trip.packingList.push({ id: generateId(), text: val, checked: false }); saveData(); renderPacking(); input.value = ''; } }
-        // Update handleTouchEnd to include pack
-        const originalTouchEnd = handleTouchEnd;
-        handleTouchEnd = function(e,el,id,type){el.style.transition='transform 0.2s cubic-bezier(0.4,0,0.2,1)';const diff=touchCurrentX-touchStartX;if(isSwiping&&diff>100){el.style.transform=`translateX(100%)`;setTimeout(()=>{if(type==='trip')deleteTrip(id);if(type==='item')deleteItem(id);if(type==='shop')deleteShopItem(id);if(type==='pack')deletePackItem(id);},200)}else{el.style.transform=`translateX(0)`}isSwiping=false;touchStartX=0;touchCurrentX=0}
 
+        function shareAsImage() {
+            const target = document.getElementById('capture-target');
+            const btn = document.querySelector('button[onclick="shareAsImage()"]');
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i>`; lucide.createIcons();
+            const originalHeight = target.style.height; const originalOverflow = target.style.overflow; target.style.height = 'auto'; target.style.overflow = 'visible'; target.style.backgroundColor = 'white';
+            html2canvas(target, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a'); link.download = '行程分享.png'; link.href = canvas.toDataURL(); link.click();
+                target.style.height = originalHeight; target.style.overflow = originalOverflow; target.style.backgroundColor = '';
+                btn.innerHTML = originalIcon; lucide.createIcons();
+            });
+        }
     </script>
 </body>
 </html>

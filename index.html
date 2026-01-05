@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 10.0</title>
+    <title>TravelFlow 13.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- html2canvas for Image Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
@@ -28,7 +30,7 @@
             position: fixed;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Fix body scroll */
+            overflow: hidden;
         }
 
         /* Utility */
@@ -51,11 +53,12 @@
             z-index: 0;
         }
 
-        /* Swipe Actions */
+        /* Swipe Actions (Restored) */
         .swipe-item-container {
             position: relative;
             overflow: hidden;
-            touch-action: pan-y;
+            touch-action: pan-y; /* Crucial for vertical scroll */
+            user-select: none;
         }
         .swipe-content {
             position: relative;
@@ -67,7 +70,7 @@
         .swipe-action-bg {
             position: absolute;
             inset: 0;
-            background-color: #ef4444;
+            background-color: #ef4444; /* Red */
             z-index: 1;
             display: flex;
             align-items: center;
@@ -81,49 +84,64 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Active Item Pulse */
+        /* Pinned Item Style */
+        .pinned-item-card {
+            border: 2px solid #fbbf24 !important; /* Amber-400 */
+            background-color: #fffbeb !important; /* Amber-50 */
+        }
+
+        /* Active Item Pulse (Restored) */
         @keyframes pulse-border {
-            0% { border-color: var(--color-main); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
-            70% { border-color: var(--color-main); box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
-            100% { border-color: var(--color-main); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
+            0% { box-shadow: -4px 0 0 0 var(--color-main); }
+            50% { box-shadow: -4px 0 0 4px rgba(13, 148, 136, 0.2); }
+            100% { box-shadow: -4px 0 0 0 var(--color-main); }
         }
         .active-item-card {
-            border-left: 4px solid var(--color-main) !important;
+            /* Use box-shadow for left border effect to avoid layout shift */
+            box-shadow: -4px 0 0 0 var(--color-main); 
             animation: pulse-border 2s infinite;
         }
 
-        /* Shopping Image Preview */
-        .shop-img-preview {
-            width: 48px;
-            height: 48px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #eee;
+        /* Pie Chart */
+        .pie-chart {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(var(--pie-gradient));
+            position: relative;
+        }
+        .pie-chart::after {
+            content: "";
+            position: absolute;
+            inset: 30px;
+            background: white;
+            border-radius: 50%;
         }
 
-        /* Modal Centering Fix */
+        /* Modal Center Fix */
         .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0,0,0,0.6);
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            padding: 1rem;
+            position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); z-index: 50;
+            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem;
         }
         .modal-container-center {
-            width: 100%;
-            max-width: 24rem; /* max-w-sm */
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            display: flex;
-            flex-direction: column;
-            max-height: 85vh;
-            margin: 0 auto; /* Force center */
+            width: 100%; max-width: 24rem; background: white; border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column;
+            max-height: 85vh; margin: 0 auto; position: relative;
+        }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        .gallery-item {
+            aspect-ratio: 1 / 1;
             position: relative;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #f9fafb;
         }
     </style>
 </head>
@@ -139,13 +157,11 @@
                     <h1 class="text-2xl font-bold text-theme flex items-center gap-2">
                         <i data-lucide="plane" class="w-6 h-6"></i> TravelFlow
                     </h1>
-                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v10.0)</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Oli & 棠棠的旅行 (v13.0)</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100">
-                        <i data-lucide="settings" class="w-6 h-6"></i>
-                    </button>
-                </div>
+                <button onclick="openSettings()" class="p-2 text-gray-400 hover:text-theme transition rounded-full active:bg-gray-100">
+                    <i data-lucide="settings" class="w-6 h-6"></i>
+                </button>
             </header>
             
             <div class="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-2xl mx-auto" id="trip-list-container">
@@ -168,63 +184,97 @@
                         <i data-lucide="arrow-left" class="w-6 h-6"></i>
                     </button>
                     <div class="text-center flex-1 mx-2 overflow-hidden px-2">
-                        <div class="flex items-center justify-center gap-2">
-                            <h2 id="detail-title" class="font-bold text-lg truncate leading-tight">Title</h2>
-                            <!-- City Weather Badge -->
-                            <div id="dest-weather-badge" class="hidden flex items-center gap-1 bg-white/20 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
-                                <span id="dest-temp" class="text-xs font-bold">--°</span>
-                                <i id="dest-weather-icon" data-lucide="sun" class="w-3 h-3 text-yellow-300"></i>
-                            </div>
-                        </div>
+                        <h2 id="detail-title" class="font-bold text-lg truncate leading-tight">Title</h2>
                         <span id="detail-cost" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full inline-block mt-0.5 font-mono">總花費: NT$ 0</span>
                     </div>
-                    <div class="w-8"></div>
+                    <button onclick="shareAsImage()" class="p-2 -mr-1 rounded-full active:bg-white/20 transition" title="分享長條圖">
+                        <i data-lucide="share-2" class="w-5 h-5"></i>
+                    </button>
                 </div>
                 <!-- Tabs -->
                 <div class="flex bg-black/10 rounded-lg p-1 max-w-md mx-auto w-full relative z-10">
                     <button onclick="switchTab('itinerary')" id="tab-itinerary" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition">行程</button>
-                    <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">記帳 & 購物</button>
+                    <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">圖表/購物</button>
+                    <button onclick="switchTab('packing')" id="tab-packing" class="flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition">行李</button>
                 </div>
             </header>
 
             <!-- Content Area -->
             <div class="flex-1 overflow-hidden relative w-full mx-auto bg-gray-50">
                 
-                <!-- Tab: Itinerary -->
-                <div id="content-itinerary" class="absolute inset-0 overflow-y-auto bg-gray-50 pb-20 scroll-smooth w-full max-w-3xl mx-auto">
-                    <!-- Day Selector -->
-                    <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100">
+                <!-- Tab 1: Itinerary -->
+                <div id="content-itinerary" class="absolute inset-0 flex flex-col w-full max-w-3xl mx-auto">
+                    <!-- Search & Days -->
+                    <div class="bg-white/95 backdrop-blur-sm z-20 shadow-sm border-b border-gray-100 shrink-0">
+                        <div class="p-2 pb-0">
+                            <div class="relative">
+                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                                <input type="text" id="search-input" onkeyup="renderTimeline()" placeholder="搜尋行程 (如: 拉麵)..." class="w-full bg-gray-100 pl-9 pr-3 py-2 rounded-lg text-sm focus:ring-1 focus:ring-theme outline-none">
+                            </div>
+                        </div>
                         <div class="flex overflow-x-auto no-scrollbar p-2 gap-2" id="day-selector">
-                            <!-- Days injected here -->
+                            <!-- Days -->
                         </div>
                     </div>
 
-                    <div id="timeline-container" class="p-4 relative min-h-[300px]">
-                        <!-- Timeline items injected here -->
-                    </div>
-
-                    <!-- Empty State -->
-                    <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
-                        <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
-                        <p class="text-sm">尚未新增行程</p>
+                    <!-- Timeline -->
+                    <div class="flex-1 overflow-y-auto pb-20 scroll-smooth relative" id="capture-target">
+                        <div id="timeline-container" class="p-4 relative min-h-[300px]">
+                            <!-- Timeline items -->
+                        </div>
+                        <div id="timeline-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                            <i data-lucide="map-pin" class="w-12 h-12 mb-2 opacity-30"></i>
+                            <p class="text-sm">沒有符合的行程</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tab: Shopping (Fixed Layout) -->
+                <!-- Tab 2: Shopping (Cleanup: Removed fixed input, rely on FAB) -->
                 <div id="content-shopping" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20 w-full">
                     <div class="w-full max-w-lg mx-auto">
-                        <div class="bg-yellow-50 text-yellow-700 text-xs p-3 rounded-xl mb-4 flex items-start gap-2 border border-yellow-100 shadow-sm">
-                            <i data-lucide="camera" class="w-4 h-4 shrink-0 mt-0.5"></i>
-                            <p>點擊下方「+」新增戰利品。照片會自動壓縮，避免佔用空間。</p>
-                        </div>
-                        
-                        <div id="shopping-list" class="space-y-3 w-full">
-                            <!-- Shopping items -->
+                        <!-- Chart -->
+                        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 flex items-center justify-between">
+                            <div class="relative w-[120px] h-[120px] shrink-0">
+                                <div id="budget-pie" class="pie-chart"></div>
+                                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span class="text-[10px] text-gray-400">總支出</span>
+                                    <span id="chart-total" class="text-xs font-bold text-gray-700">0</span>
+                                </div>
+                            </div>
+                            <div class="flex-1 pl-4 space-y-1.5" id="chart-legend"></div>
                         </div>
 
-                        <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-20 text-gray-400">
+                        <!-- Toggle -->
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700">戰利品與記帳</h3>
+                            <div class="flex bg-gray-200 rounded-lg p-0.5">
+                                <button onclick="setGalleryMode(false)" id="btn-list-view" class="p-1.5 rounded-md bg-white shadow-sm"><i data-lucide="list" class="w-4 h-4"></i></button>
+                                <button onclick="setGalleryMode(true)" id="btn-grid-view" class="p-1.5 rounded-md text-gray-500"><i data-lucide="grid" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- List/Grid -->
+                        <div id="shopping-list" class="w-full"></div>
+                        <div id="shopping-empty" class="hidden flex flex-col items-center justify-center mt-10 text-gray-400">
                             <i data-lucide="shopping-bag" class="w-12 h-12 mb-2 opacity-30"></i>
-                            <p class="text-sm">尚無購買紀錄</p>
+                            <p class="text-sm">尚無紀錄，點擊右下角「+」新增</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Packing -->
+                <div id="content-packing" class="absolute inset-0 overflow-y-auto bg-gray-50 hidden p-4 pb-20 w-full">
+                    <div class="w-full max-w-lg mx-auto">
+                        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                            <div class="p-4 border-b border-gray-100 bg-teal-50 flex justify-between items-center">
+                                <h3 class="font-bold text-teal-800">行李檢查清單</h3>
+                                <span id="packing-progress" class="text-xs font-bold text-teal-600">0/0</span>
+                            </div>
+                            <div class="p-2 bg-gray-50 border-b border-gray-100 flex gap-2">
+                                <input type="text" id="new-pack-item" placeholder="新增物品..." class="flex-1 p-2 rounded-lg border-none focus:ring-1 focus:ring-theme text-sm">
+                                <button onclick="addPackItem()" class="bg-theme text-white px-3 rounded-lg text-sm">新增</button>
+                            </div>
+                            <div id="packing-list-container" class="divide-y divide-gray-100"></div>
                         </div>
                     </div>
                 </div>
@@ -241,50 +291,43 @@
 
     <!-- ==================== MODALS ==================== -->
     
-    <!-- Modal: Settings -->
+    <!-- Settings -->
     <div id="modal-settings" class="modal-overlay hidden">
         <div class="modal-container-center">
             <div class="p-6 h-full flex flex-col">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">APP 設定</h3>
-                
-                <div class="mb-6 border-b border-gray-100 pb-4">
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">主題顏色</label>
+                <h3 class="text-lg font-bold text-gray-800 mb-4">設定</h3>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">主題</label>
                     <div class="flex gap-4 justify-center">
-                        <button onclick="setTheme('teal')" class="w-10 h-10 rounded-full bg-teal-600 ring-2 ring-transparent focus:ring-teal-200"></button>
-                        <button onclick="setTheme('rose')" class="w-10 h-10 rounded-full bg-rose-500 ring-2 ring-transparent focus:ring-rose-200"></button>
-                        <button onclick="setTheme('blue')" class="w-10 h-10 rounded-full bg-blue-600 ring-2 ring-transparent focus:ring-blue-200"></button>
+                        <button onclick="setTheme('teal')" class="w-8 h-8 rounded-full bg-teal-600"></button>
+                        <button onclick="setTheme('rose')" class="w-8 h-8 rounded-full bg-rose-500"></button>
+                        <button onclick="setTheme('blue')" class="w-8 h-8 rounded-full bg-blue-600"></button>
                     </div>
                 </div>
-
-                <div class="mb-6 flex-1 overflow-y-auto">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide">匯率設定 (對台幣)</label>
-                        <button onclick="fetchRealTimeRates()" class="text-[10px] bg-gray-100 px-2 py-1 rounded text-theme hover:bg-gray-200 flex items-center gap-1">
-                            <i data-lucide="refresh-cw" class="w-3 h-3"></i> 更新
-                        </button>
+                <div class="mb-2 flex-1 overflow-y-auto">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase">匯率</label>
+                        <button onclick="fetchRealTimeRates()" class="text-[10px] bg-gray-100 px-2 py-1 rounded text-theme flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i></button>
                     </div>
                     <div class="space-y-2 text-sm">
-                        <div class="flex items-center justify-between"><span class="w-12 font-bold text-gray-600">JPY</span><input type="number" id="rate-JPY" step="0.001" onchange="updateRate('JPY', this.value)" class="w-24 p-1 bg-gray-50 border rounded text-right"></div>
-                        <div class="flex items-center justify-between"><span class="w-12 font-bold text-gray-600">USD</span><input type="number" id="rate-USD" step="0.1" onchange="updateRate('USD', this.value)" class="w-24 p-1 bg-gray-50 border rounded text-right"></div>
-                        <div class="flex items-center justify-between"><span class="w-12 font-bold text-gray-600">KRW</span><input type="number" id="rate-KRW" step="0.001" onchange="updateRate('KRW', this.value)" class="w-24 p-1 bg-gray-50 border rounded text-right"></div>
-                        <div class="flex items-center justify-between"><span class="w-12 font-bold text-gray-600">EUR</span><input type="number" id="rate-EUR" step="0.1" onchange="updateRate('EUR', this.value)" class="w-24 p-1 bg-gray-50 border rounded text-right"></div>
-                        <div class="flex items-center justify-between"><span class="w-12 font-bold text-gray-600">HKD</span><input type="number" id="rate-HKD" step="0.1" onchange="updateRate('HKD', this.value)" class="w-24 p-1 bg-gray-50 border rounded text-right"></div>
+                        <div class="flex justify-between"><span class="font-bold text-gray-600">JPY</span><input type="number" id="rate-JPY" step="0.001" onchange="updateRate('JPY',this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right"></div>
+                        <div class="flex justify-between"><span class="font-bold text-gray-600">USD</span><input type="number" id="rate-USD" step="0.1" onchange="updateRate('USD',this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right"></div>
+                        <div class="flex justify-between"><span class="font-bold text-gray-600">KRW</span><input type="number" id="rate-KRW" step="0.001" onchange="updateRate('KRW',this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right"></div>
+                        <div class="flex justify-between"><span class="font-bold text-gray-600">EUR</span><input type="number" id="rate-EUR" step="0.1" onchange="updateRate('EUR',this.value)" class="w-20 p-1 bg-gray-50 border rounded text-right"></div>
                     </div>
                 </div>
-
                 <button onclick="closeModal('modal-settings')" class="w-full py-3 bg-gray-100 text-gray-600 font-medium rounded-xl hover:bg-gray-200">完成</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Add Trip (Fix: Absolutely Centered & No Scroll) -->
+    <!-- Add Trip -->
     <div id="modal-trip" class="modal-overlay hidden">
         <div class="modal-container-center">
             <div class="p-6 h-full flex flex-col">
                 <h3 class="text-lg font-bold mb-4 text-gray-800 shrink-0">建立新旅行</h3>
                 <div class="space-y-4 flex-1 overflow-y-auto">
                     <input type="text" id="input-trip-name" placeholder="旅行名稱" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
-                    <input type="text" id="input-trip-city" placeholder="主要城市 (如: Osaka)" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
                     <input type="date" id="input-trip-date" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
                     <div class="flex items-center justify-between bg-gray-50 p-2 rounded-xl">
                         <button onclick="adjustDays(-1)" class="w-10 h-10 rounded-lg bg-white shadow-sm font-bold text-gray-500 active:scale-95">-</button>
@@ -300,161 +343,78 @@
         </div>
     </div>
 
-    <!-- Modal: Itinerary Item -->
+    <!-- Itinerary Item -->
     <div id="modal-item" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center sm:p-4 backdrop-blur-sm">
         <div class="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col animate-slide-up">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
                 <h3 class="text-lg font-bold text-gray-800">行程細節</h3>
                 <button onclick="closeModal('modal-item')" class="p-1 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
             </div>
-            
             <div class="p-5 modal-body-scroll space-y-5">
-                <!-- Time & Type -->
                 <div class="flex gap-3">
-                    <div class="w-1/3">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">時間</label>
-                        <input type="time" id="item-time" class="w-full p-3 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-theme">
-                    </div>
-                    <div class="w-2/3">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">類型</label>
-                        <select id="item-type" class="w-full p-3 bg-gray-50 rounded-xl outline-none appearance-none bg-white border border-gray-200">
-                            <option value="spot">📍 景點</option>
-                            <option value="food">🍴 餐廳</option>
-                            <option value="transport">🚌 交通</option>
-                            <option value="stay">🛏️ 住宿</option>
-                            <option value="flight">✈️ 航班</option>
-                        </select>
-                    </div>
+                    <div class="w-1/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">時間</label><input type="time" id="item-time" class="w-full p-3 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-theme"></div>
+                    <div class="w-2/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">類型</label><select id="item-type" class="w-full p-3 bg-gray-50 rounded-xl outline-none bg-white border border-gray-200"><option value="spot">📍 景點</option><option value="food">🍴 餐廳</option><option value="transport">🚌 交通</option><option value="stay">🛏️ 住宿</option><option value="flight">✈️ 航班</option></select></div>
                 </div>
-
-                <!-- Main Content -->
+                <div class="flex items-center gap-2"><input type="checkbox" id="item-pinned" class="w-5 h-5 accent-yellow-400 rounded"><label for="item-pinned" class="text-sm font-bold text-gray-700 flex items-center gap-1">標示為重點行程 <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i></label></div>
                 <div class="p-4 border border-gray-100 rounded-2xl relative shadow-sm">
-                    <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">主要行程 Plan A</span>
-                    <input type="text" id="item-title" placeholder="要做什麼？" class="w-full p-2 mb-2 font-medium text-lg border-b border-gray-100 outline-none placeholder-gray-300">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i>
-                        <input type="text" id="item-location" placeholder="地點 (輸入以取得天氣)" class="w-full p-1 text-sm outline-none">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <select id="item-currency" class="text-xs font-bold text-gray-500 bg-gray-100 rounded p-1 outline-none"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option><option value="HKD">HKD</option></select>
-                        <input type="number" id="item-cost" placeholder="費用" class="w-full p-1 text-sm outline-none">
-                    </div>
+                    <span class="absolute -top-2.5 left-3 bg-white px-1 text-xs font-bold text-theme">主要行程</span>
+                    <input type="text" id="item-title" placeholder="要做什麼？" class="w-full p-2 mb-2 font-medium text-lg border-b border-gray-100 outline-none">
+                    <div class="flex items-center gap-2 mb-2"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i><input type="text" id="item-location" placeholder="地點" class="w-full p-1 text-sm outline-none"></div>
+                    <div class="flex items-center gap-2"><select id="item-currency" class="text-xs font-bold text-gray-500 bg-gray-100 rounded p-1 outline-none"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option></select><input type="number" id="item-cost" placeholder="費用" class="w-full p-1 text-sm outline-none"></div>
                 </div>
-
-                <!-- Plan B -->
                 <div class="border border-dashed border-gray-300 rounded-2xl p-4 bg-gray-50">
-                    <label class="flex items-center gap-2 text-sm font-bold text-gray-600">
-                        <input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded">
-                        啟用備案 (Plan B)
-                    </label>
-                    <div id="plan-b-inputs" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-200">
-                        <input type="text" id="backup-title" placeholder="備案標題..." class="w-full p-2 bg-white rounded-lg text-sm border border-gray-200 shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i>
-                            <input type="text" id="backup-location" placeholder="備案地點" class="w-full p-1 bg-transparent text-sm outline-none">
-                        </div>
-                    </div>
+                    <label class="flex items-center gap-2 text-sm font-bold text-gray-600"><input type="checkbox" id="has-plan-b" onchange="togglePlanBInputs()" class="w-5 h-5 accent-current text-theme rounded"> 啟用備案 (Plan B)</label>
+                    <div id="plan-b-inputs" class="hidden space-y-3 mt-3 pt-3 border-t border-gray-200"><input type="text" id="backup-title" placeholder="備案標題..." class="w-full p-2 bg-white rounded-lg text-sm border border-gray-200 shadow-sm"><div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0"></i><input type="text" id="backup-location" placeholder="備案地點" class="w-full p-1 bg-transparent text-sm outline-none"></div></div>
                 </div>
-
-                <!-- Note -->
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">備註</label>
-                    <textarea id="item-note" rows="3" placeholder="詳細資訊..." class="w-full p-3 bg-gray-50 rounded-xl outline-none resize-none text-sm border border-transparent focus:border-theme"></textarea>
-                </div>
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">備註</label><textarea id="item-note" rows="3" placeholder="詳細資訊..." class="w-full p-3 bg-gray-50 rounded-xl outline-none resize-none text-sm border border-transparent focus:border-theme"></textarea></div>
                 <div class="h-4"></div>
             </div>
-
             <div class="p-4 border-t border-gray-100 bg-white pb-safe shrink-0">
                 <button onclick="saveItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">儲存行程</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Shopping Item (Fix: Photo Upload Logic) -->
+    <!-- Modal: Shop -->
     <div id="modal-shop" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center sm:p-4 backdrop-blur-sm">
         <div class="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col animate-slide-up">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
-                <h3 class="text-lg font-bold text-gray-800">新增戰利品</h3>
+                <h3 class="text-lg font-bold text-gray-800">戰利品 / 記帳</h3>
                 <button onclick="closeModal('modal-shop')" class="p-1 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
             </div>
-            
             <div class="p-5 modal-body-scroll space-y-5">
-                <!-- Name -->
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">物品名稱</label>
-                    <input type="text" id="shop-name" placeholder="買了什麼？" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
-                </div>
-
-                <!-- Cost -->
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">物品</label><input type="text" id="shop-name" placeholder="買了什麼？" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div>
                 <div class="flex gap-3">
-                    <div class="w-1/3">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">幣種</label>
-                        <select id="shop-currency" class="w-full p-3 bg-gray-50 rounded-xl outline-none appearance-none bg-white border border-gray-200">
-                            <option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option><option value="HKD">HKD</option>
-                        </select>
-                    </div>
-                    <div class="w-2/3">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">金額</label>
-                        <input type="number" id="shop-price" placeholder="0" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
-                    </div>
+                    <div class="w-1/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">幣種</label><select id="shop-currency" class="w-full p-3 bg-gray-50 rounded-xl outline-none bg-white border border-gray-200"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option></select></div>
+                    <div class="w-2/3"><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">金額</label><input type="number" id="shop-price" placeholder="0" class="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div>
                 </div>
-
-                <!-- Location -->
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">購買地點</label>
-                    <div class="relative">
-                        <i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i>
-                        <input type="text" id="shop-location" placeholder="在哪裡買的？" class="w-full p-3 pl-10 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme">
-                    </div>
-                </div>
-
-                <!-- Photo (Fixed Compression) -->
-                <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">照片 (自動壓縮)</label>
-                    <div class="flex items-center gap-4">
-                        <label class="flex-1 h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition relative overflow-hidden">
-                            <input type="file" id="shop-photo" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
-                            <div id="shop-photo-placeholder" class="text-center">
-                                <i data-lucide="camera" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
-                                <span class="text-xs text-gray-500">點擊上傳</span>
-                            </div>
-                            <img id="shop-photo-preview" class="absolute inset-0 w-full h-full object-cover hidden">
-                        </label>
-                        <button onclick="clearShopImage()" class="p-2 text-gray-400 hover:text-red-500" title="移除照片">
-                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">地點</label><div class="relative"><i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i><input type="text" id="shop-location" placeholder="在哪裡買的？" class="w-full p-3 pl-10 bg-gray-50 rounded-xl border-none focus:ring-2 border-theme"></div></div>
+                <div><label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">照片 (自動壓縮)</label><div class="flex items-center gap-4"><label class="flex-1 h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition relative overflow-hidden"><input type="file" id="shop-photo" accept="image/*" class="hidden" onchange="handleImageUpload(this)"><div id="shop-photo-placeholder" class="text-center"><i data-lucide="camera" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i><span class="text-xs text-gray-500">點擊上傳</span></div><img id="shop-photo-preview" class="absolute inset-0 w-full h-full object-cover hidden"></label><button onclick="clearShopImage()" class="p-2 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div></div>
             </div>
-
             <div class="p-4 border-t border-gray-100 bg-white pb-safe shrink-0">
-                <button id="shop-save-btn" onclick="saveShopItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">加入清單</button>
+                <button onclick="saveShopItem()" class="w-full py-3.5 bg-theme text-white font-bold rounded-xl shadow-lg active:scale-95 transition">儲存</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Init & Config ---
-        const THEMES = {
-            teal: { main: '#0d9488', light: '#f0fdfa' },
-            rose: { main: '#e11d48', light: '#fff1f2' },
-            blue: { main: '#2563eb', light: '#eff6ff' }
-        };
+        // --- Init ---
+        const THEMES = { teal: { main: '#0d9488', light: '#f0fdfa' }, rose: { main: '#e11d48', light: '#fff1f2' }, blue: { main: '#2563eb', light: '#eff6ff' } };
         let defaultRates = { TWD: 1, JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.2, HKD: 4.05 };
+        let defaultPacking = ["護照", "身分證", "現金/信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "網卡/Wifi機", "雨傘/雨衣"];
 
-        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v10')) || [];
-        let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings_v10')) || { theme: 'teal', rates: defaultRates };
-        // Weather Cache: { 'Tokyo': { data: {}, timestamp: 12345 } }
-        let weatherCache = JSON.parse(localStorage.getItem('travelFlow_weather_cache')) || {};
-
+        let trips = JSON.parse(localStorage.getItem('travelFlow_trips_v13')) || [];
+        let appSettings = JSON.parse(localStorage.getItem('travelFlow_settings_v13')) || { theme: 'teal', rates: defaultRates };
+        
         let currentTripId = null;
         let currentDayIndex = 0;
         let tempDaysCount = 3;
         let editingItemId = null;
         let editingShopId = null;
-        let liveTrackerInterval = null;
         let activeTab = 'home';
-        let currentShopImageBase64 = null; // Store compressed image explicitly
+        let currentShopImageBase64 = null;
+        let isGalleryMode = false;
+        let liveTrackerInterval = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(appSettings.theme);
@@ -465,167 +425,31 @@
             fetchRealTimeRates();
         });
 
-        // --- Image Compression Logic (Fix for Issue 1) ---
-        function handleImageUpload(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = function() {
-                        // Compress logic
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Max dimension 600px (enough for phone screen preview)
-                        const MAX_WIDTH = 600;
-                        const MAX_HEIGHT = 600;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                        } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // To JPEG with 0.7 quality
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                        currentShopImageBase64 = dataUrl;
-                        
-                        // UI Update
-                        const preview = document.getElementById('shop-photo-preview');
-                        const placeholder = document.getElementById('shop-photo-placeholder');
-                        preview.src = dataUrl;
-                        preview.classList.remove('hidden');
-                        placeholder.classList.add('hidden');
-                    }
-                }
-                reader.readAsDataURL(file);
-            }
+        // --- Helpers ---
+        function applyTheme(themeName) {
+            const theme = THEMES[themeName] || THEMES.teal;
+            const root = document.documentElement;
+            root.style.setProperty('--color-main', theme.main);
+            root.style.setProperty('--color-light', theme.light);
+            appSettings.theme = themeName;
+            localStorage.setItem('travelFlow_settings_v13', JSON.stringify(appSettings));
         }
-
-        function clearShopImage() {
-            document.getElementById('shop-photo').value = '';
-            document.getElementById('shop-photo-preview').classList.add('hidden');
-            document.getElementById('shop-photo-placeholder').classList.remove('hidden');
-            currentShopImageBase64 = null;
-        }
-
-        // --- Weather Logic (Fix for Issue 3: Cache & Stability) ---
-        // Cache weather for 1 hour (3600000 ms)
-        const CACHE_DURATION = 3600000;
-
-        async function fetchCoordinates(placeName) {
-            if (!placeName) return null;
-            // Check cache key "GEO_name"
-            const cacheKey = `GEO_${placeName}`;
-            if (weatherCache[cacheKey]) {
-                return weatherCache[cacheKey].data;
-            }
-
-            try {
-                const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(placeName)}&count=1&language=zh&format=json`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.results && data.results.length > 0) {
-                    const coords = { lat: data.results[0].latitude, lon: data.results[0].longitude };
-                    // Save to cache (Geocoding doesn't change often, keep forever basically, or long time)
-                    weatherCache[cacheKey] = { data: coords, timestamp: Date.now() };
-                    localStorage.setItem('travelFlow_weather_cache', JSON.stringify(weatherCache));
-                    return coords;
-                }
-            } catch (e) { console.log('Geocoding fail'); }
-            return null;
-        }
-
-        async function fetchWeatherForUI(lat, lon, elementIds) {
-            const cacheKey = `WEATHER_${lat}_${lon}`;
-            const now = Date.now();
-            
-            if (weatherCache[cacheKey] && (now - weatherCache[cacheKey].timestamp < CACHE_DURATION)) {
-                updateWeatherDOM(weatherCache[cacheKey].data, elementIds);
-                return;
-            }
-
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.current_weather) {
-                    weatherCache[cacheKey] = { data: data.current_weather, timestamp: now };
-                    localStorage.setItem('travelFlow_weather_cache', JSON.stringify(weatherCache));
-                    updateWeatherDOM(data.current_weather, elementIds);
-                }
-            } catch (e) { console.log("Weather fetch fail"); }
-        }
-
-        function updateWeatherDOM(weatherData, ids) {
-            const { tempId, badgeId, iconId, textId } = ids;
-            const code = weatherData.weathercode;
-            const temp = Math.round(weatherData.temperature);
-
-            // Icon logic
-            let icon = 'sun';
-            let color = 'text-yellow-500';
-            if (code > 3) { icon = 'cloud'; color = 'text-gray-500'; }
-            if (code >= 51) { icon = 'cloud-drizzle'; color = 'text-blue-400'; }
-            if (code >= 61) { icon = 'cloud-rain'; color = 'text-blue-600'; }
-            if (code >= 71) { icon = 'snowflake'; color = 'text-cyan-400'; }
-            if (code >= 95) { icon = 'cloud-lightning'; color = 'text-purple-500'; }
-
-            // Update DOM if elements exist
-            if (document.getElementById(tempId)) document.getElementById(tempId).innerText = `${temp}°`;
-            if (document.getElementById(badgeId)) document.getElementById(badgeId).classList.remove('hidden');
-            
-            // For destination header icon
-            if (iconId && document.getElementById(iconId)) {
-                const iEl = document.getElementById(iconId);
-                iEl.setAttribute('data-lucide', icon);
-                // Reset classes for color
-                iEl.className = `w-3 h-3 ${color}`;
-            }
-
-            // For Spot weather (injected HTML)
-            if (textId) {
-                 const container = document.getElementById(textId);
-                 if (container) {
-                     container.innerHTML = `
-                        <div class="flex items-center gap-1 text-[10px] bg-gray-100 px-2 py-0.5 rounded-full mt-1 ${color}">
-                            <i data-lucide="${icon}" class="w-3 h-3"></i>
-                            <span>${temp}°</span>
-                        </div>`;
-                 }
-            }
-            lucide.createIcons();
-        }
-
-        // --- Currency Logic ---
+        function setTheme(name) { applyTheme(name); renderHome(); if(currentTripId) renderTimeline(); }
+        function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+        function saveData() { localStorage.setItem('travelFlow_trips_v13', JSON.stringify(trips)); }
+        function getTrip(id) { return trips.find(t => t.id === id); }
+        function getDayName(dateStr, addDays) { const date = new Date(dateStr); date.setDate(date.getDate() + addDays); return ['日','一','二','三','四','五','六'][date.getDay()]; }
+        
         async function fetchRealTimeRates() {
-            try {
-                const res = await fetch('https://api.exchangerate-api.com/v4/latest/TWD');
-                const data = await res.json();
+            try { const res = await fetch('https://api.exchangerate-api.com/v4/latest/TWD'); const data = await res.json();
                 if (data && data.rates) {
-                    appSettings.rates.JPY = 1 / data.rates.JPY;
-                    appSettings.rates.USD = 1 / data.rates.USD;
-                    appSettings.rates.KRW = 1 / data.rates.KRW;
-                    appSettings.rates.EUR = 1 / data.rates.EUR;
-                    appSettings.rates.HKD = 1 / data.rates.HKD;
-                    localStorage.setItem('travelFlow_settings_v10', JSON.stringify(appSettings));
-                    loadRatesToModal(); updateCostDisplay();
+                    appSettings.rates.JPY = 1 / data.rates.JPY; appSettings.rates.USD = 1 / data.rates.USD;
+                    appSettings.rates.KRW = 1 / data.rates.KRW; appSettings.rates.EUR = 1 / data.rates.EUR;
+                    localStorage.setItem('travelFlow_settings_v13', JSON.stringify(appSettings)); loadRatesToModal(); updateCostDisplay();
                 }
-            } catch (e) { console.error("Rate fetch failed"); }
+            } catch (e) {}
         }
         function loadRatesToModal() {
             if(!appSettings.rates) appSettings.rates = defaultRates;
@@ -633,38 +457,9 @@
             document.getElementById('rate-USD').value = parseFloat(appSettings.rates.USD).toFixed(2);
             document.getElementById('rate-KRW').value = parseFloat(appSettings.rates.KRW).toFixed(4);
             document.getElementById('rate-EUR').value = parseFloat(appSettings.rates.EUR).toFixed(2);
-            document.getElementById('rate-HKD').value = parseFloat(appSettings.rates.HKD).toFixed(2);
         }
-        function updateRate(curr, val) {
-            appSettings.rates[curr] = parseFloat(val);
-            localStorage.setItem('travelFlow_settings_v10', JSON.stringify(appSettings));
-            updateCostDisplay();
-        }
-        function convertToTWD(amount, currency) {
-            if (!amount) return 0;
-            const rate = appSettings.rates[currency] || 1;
-            return Math.round(amount * rate);
-        }
-
-        // --- Standard Functions ---
-        function applyTheme(themeName) {
-            const theme = THEMES[themeName] || THEMES.teal;
-            const root = document.documentElement;
-            root.style.setProperty('--color-main', theme.main);
-            root.style.setProperty('--color-light', theme.light);
-            appSettings.theme = themeName;
-            localStorage.setItem('travelFlow_settings_v10', JSON.stringify(appSettings));
-        }
-        function setTheme(name) { applyTheme(name); renderHome(); if(currentTripId) renderTimeline(); }
-        function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-        function saveData() { localStorage.setItem('travelFlow_trips_v10', JSON.stringify(trips)); }
-        function getTrip(id) { return trips.find(t => t.id === id); }
-        function getDayName(dateStr, addDays) {
-            const date = new Date(dateStr); date.setDate(date.getDate() + addDays);
-            const days = ['日', '一', '二', '三', '四', '五', '六']; return days[date.getDay()];
-        }
+        function updateRate(curr, val) { appSettings.rates[curr] = parseFloat(val); localStorage.setItem('travelFlow_settings_v13', JSON.stringify(appSettings)); updateCostDisplay(); }
+        function convertToTWD(amount, currency) { if (!amount) return 0; const rate = appSettings.rates[currency] || 1; return Math.round(amount * rate); }
         function calculateTotalCost(trip) {
             let totalTWD = 0;
             if (trip.days) trip.days.forEach(d => d.items.forEach(i => totalTWD += convertToTWD(parseInt(i.cost), i.currency || 'TWD')));
@@ -672,67 +467,49 @@
             return totalTWD;
         }
 
+        // --- Navigation ---
+        function openTrip(id) {
+            currentTripId = id; const trip = getTrip(id);
+            if (!trip.packingList) { trip.packingList = defaultPacking.map(text => ({ id: generateId(), text, checked: false })); saveData(); }
+            switchTab('itinerary');
+            document.getElementById('detail-title').innerText = trip.title;
+            updateCostDisplay();
+            document.getElementById('view-detail').classList.remove('translate-x-full');
+            renderDays(); renderTimeline(); renderShopping(); renderPacking(); updatePieChart(); startLiveTracking();
+        }
+        function goBack() {
+            document.getElementById('view-detail').classList.add('translate-x-full'); stopLiveTracking();
+            setTimeout(() => { currentTripId = null; renderHome(); activeTab = 'home'; }, 300);
+        }
+        function switchTab(tab) {
+            activeTab = tab;
+            ['itinerary','shopping','packing'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
+            document.getElementById('fab-container').classList.toggle('hidden', false);
+            if (tab === 'shopping') updatePieChart();
+            if (tab === 'itinerary') startLiveTracking(); else stopLiveTracking();
+        }
+        function updateCostDisplay() {
+            const trip = getTrip(currentTripId); const total = calculateTotalCost(trip);
+            document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`;
+        }
+
         // --- Fab Logic ---
         function handleFabClick() {
             if (activeTab === 'itinerary') openAddItemModal();
             else if (activeTab === 'shopping') openAddShopModal();
             else if (activeTab === 'home') openAddTripModal();
-        }
-
-        // --- Views ---
-        function openTrip(id) {
-            currentTripId = id;
-            const trip = getTrip(id);
-            const today = new Date(); today.setHours(0,0,0,0);
-            const start = new Date(trip.startDate); start.setHours(0,0,0,0);
-            const dayMs = 1000 * 60 * 60 * 24;
-            const index = Math.round((today - start) / dayMs);
-            if (index >= 0 && index < trip.days.length) currentDayIndex = index; else currentDayIndex = 0;
-
-            switchTab('itinerary');
-            document.getElementById('detail-title').innerText = trip.title;
-            
-            // Trip Weather
-            fetchCoordinates(trip.city).then(coords => {
-                if(coords) fetchWeatherForUI(coords.lat, coords.lon, { tempId: 'dest-temp', badgeId: 'dest-weather-badge', iconId: 'dest-weather-icon' });
-            });
-
-            updateCostDisplay();
-            document.getElementById('view-detail').classList.remove('translate-x-full');
-            renderDays(); renderTimeline(); renderShopping(); startLiveTracking();
-        }
-        function goBack() {
-            document.getElementById('view-detail').classList.add('translate-x-full');
-            stopLiveTracking();
-            setTimeout(() => { currentTripId = null; renderHome(); activeTab = 'home'; }, 300);
-        }
-        function switchTab(tab) {
-            activeTab = tab;
-            const itineraryContent = document.getElementById('content-itinerary');
-            const shoppingContent = document.getElementById('content-shopping');
-            const fab = document.getElementById('fab-container');
-            const btnItinerary = document.getElementById('tab-itinerary');
-            const btnShopping = document.getElementById('tab-shopping');
-            
-            if (tab === 'itinerary') {
-                btnItinerary.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
-                btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
-                itineraryContent.classList.remove('hidden'); shoppingContent.classList.add('hidden'); fab.classList.remove('hidden');
-                startLiveTracking(); scrollToActiveItem();
-            } else {
-                btnShopping.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-theme shadow-sm transition";
-                btnItinerary.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-white/80 transition";
-                shoppingContent.classList.remove('hidden'); itineraryContent.classList.add('hidden'); fab.classList.remove('hidden');
-                stopLiveTracking();
+            else if (activeTab === 'packing') {
+                const name = prompt("輸入物品名稱：");
+                if(name) { const trip = getTrip(currentTripId); trip.packingList.push({ id: generateId(), text: name, checked: false }); saveData(); renderPacking(); }
             }
         }
-        function updateCostDisplay() {
-            const trip = getTrip(currentTripId);
-            const total = calculateTotalCost(trip);
-            document.getElementById('detail-cost').innerText = `總花費: NT$ ${total.toLocaleString()}`;
-        }
 
-        // --- CRUD: Shopping ---
+        // --- Shopping (Updated Logic) ---
         function openAddShopModal() {
             editingShopId = null;
             document.getElementById('modal-shop').classList.remove('hidden');
@@ -743,158 +520,123 @@
             clearShopImage();
         }
         function openEditShopModal(id) {
-            editingShopId = id;
-            const trip = getTrip(currentTripId);
-            const item = trip.shoppingList.find(i => i.id === id);
-            if (!item) return;
+            editingShopId = id; const trip = getTrip(currentTripId); const item = trip.shoppingList.find(i => i.id === id); if (!item) return;
             document.getElementById('modal-shop').classList.remove('hidden');
             document.getElementById('shop-name').value = item.text;
             document.getElementById('shop-price').value = item.price;
             document.getElementById('shop-currency').value = item.currency;
             document.getElementById('shop-location').value = item.location || '';
-            
-            const preview = document.getElementById('shop-photo-preview');
-            const placeholder = document.getElementById('shop-photo-placeholder');
-            if (item.image) {
-                preview.src = item.image;
-                currentShopImageBase64 = item.image;
-                preview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            } else {
-                clearShopImage();
-            }
+            const preview = document.getElementById('shop-photo-preview'); const placeholder = document.getElementById('shop-photo-placeholder');
+            if (item.image) { preview.src = item.image; currentShopImageBase64 = item.image; preview.classList.remove('hidden'); placeholder.classList.add('hidden'); } else { clearShopImage(); }
         }
-        
         function saveShopItem() {
             const text = document.getElementById('shop-name').value.trim();
             const price = document.getElementById('shop-price').value;
             const currency = document.getElementById('shop-currency').value;
             const location = document.getElementById('shop-location').value.trim();
+            if (!text) return alert('請輸入物品名稱');
             
-            // Check Quota issue here
             try {
-                if (!text) return alert('請輸入物品名稱');
-                const trip = getTrip(currentTripId);
-                if (!trip.shoppingList) trip.shoppingList = [];
-
+                const trip = getTrip(currentTripId); if (!trip.shoppingList) trip.shoppingList = [];
                 const newItem = { 
                     id: editingShopId || generateId(), 
                     text, price, currency, location, 
-                    image: currentShopImageBase64, // Use the compressed global var
+                    image: currentShopImageBase64, 
                     checked: editingShopId ? trip.shoppingList.find(i => i.id === editingShopId).checked : false 
                 };
-
-                if (editingShopId) {
-                    const idx = trip.shoppingList.findIndex(i => i.id === editingShopId);
-                    if (idx > -1) trip.shoppingList[idx] = newItem;
-                } else {
-                    trip.shoppingList.push(newItem);
-                }
-                saveData(); 
-                closeModal('modal-shop'); 
-                renderShopping(); 
-                updateCostDisplay();
-            } catch (e) {
-                alert('儲存失敗：資料量過大。請嘗試不上傳照片，或使用更低畫質的照片。');
-                console.error(e);
+                if (editingShopId) { const idx = trip.shoppingList.findIndex(i => i.id === editingShopId); if (idx > -1) trip.shoppingList[idx] = newItem; } else { trip.shoppingList.push(newItem); }
+                saveData(); closeModal('modal-shop'); renderShopping(); updateCostDisplay(); updatePieChart();
+            } catch (e) { alert('儲存失敗：資料量過大'); }
+        }
+        function handleImageUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader(); reader.onload = function(e) {
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const MAX_WIDTH = 600; const MAX_HEIGHT = 600; let width = img.width; let height = img.height;
+                        if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                        canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); currentShopImageBase64 = dataUrl;
+                        const preview = document.getElementById('shop-photo-preview'); const placeholder = document.getElementById('shop-photo-placeholder'); preview.src = dataUrl; preview.classList.remove('hidden'); placeholder.classList.add('hidden');
+                    }
+                }; reader.readAsDataURL(input.files[0]);
             }
         }
-
-        // --- Render Shopping ---
+        function clearShopImage() { document.getElementById('shop-photo').value = ''; document.getElementById('shop-photo-preview').classList.add('hidden'); document.getElementById('shop-photo-placeholder').classList.remove('hidden'); currentShopImageBase64 = null; }
+        
+        function setGalleryMode(enable) {
+            isGalleryMode = enable;
+            document.getElementById('btn-list-view').className = enable ? "p-1.5 rounded-md text-gray-500" : "p-1.5 rounded-md bg-white shadow-sm";
+            document.getElementById('btn-grid-view').className = enable ? "p-1.5 rounded-md bg-white shadow-sm" : "p-1.5 rounded-md text-gray-500";
+            renderShopping();
+        }
         function renderShopping() {
-            const trip = getTrip(currentTripId);
-            const container = document.getElementById('shopping-list');
-            const emptyState = document.getElementById('shopping-empty');
-            container.innerHTML = '';
-            if (!trip.shoppingList || trip.shoppingList.length === 0) { emptyState.classList.remove('hidden'); return; }
+            const trip = getTrip(currentTripId); const container = document.getElementById('shopping-list'); const emptyState = document.getElementById('shopping-empty');
+            if (!trip.shoppingList || trip.shoppingList.length === 0) { emptyState.classList.remove('hidden'); container.innerHTML = ''; return; }
             emptyState.classList.add('hidden');
-            trip.shoppingList.forEach(item => {
-                const el = document.createElement('div');
-                el.className = 'swipe-item-container rounded-xl overflow-hidden';
-                const mapLink = item.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}` : '#';
-                const priceInputHtml = item.checked ? `
-                    <div class="flex items-center border-l border-gray-100 pl-2 ml-2 gap-1 flex-shrink-0">
-                        <select onchange="updateShopCurrency('${item.id}', this.value)" class="text-[10px] bg-gray-100 rounded p-1 font-bold text-gray-500 outline-none h-8">
-                            <option value="TWD" ${item.currency === 'TWD' ? 'selected' : ''}>TWD</option>
-                            <option value="JPY" ${item.currency === 'JPY' ? 'selected' : ''}>JPY</option>
-                            <option value="USD" ${item.currency === 'USD' ? 'selected' : ''}>USD</option>
-                            <option value="KRW" ${item.currency === 'KRW' ? 'selected' : ''}>KRW</option>
-                            <option value="EUR" ${item.currency === 'EUR' ? 'selected' : ''}>EUR</option>
-                            <option value="HKD" ${item.currency === 'HKD' ? 'selected' : ''}>HKD</option>
-                        </select>
-                        <input type="number" value="${item.price || ''}" onchange="updateShopPrice('${item.id}', this.value)" placeholder="0" class="w-20 p-1 text-sm bg-gray-50 rounded border-none focus:ring-1 focus:ring-teal-500 outline-none text-right font-bold text-theme h-8">
-                    </div>` : '';
-                el.innerHTML = `
-                    <div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
-                    <div class="swipe-content bg-white p-3 border border-gray-100 flex gap-3"
-                         onclick="openEditShopModal('${item.id}')"
-                         ontouchstart="handleTouchStart(event, this, '${item.id}', 'shop')" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${item.id}', 'shop')">
-                        ${item.image ? `<img src="${item.image}" class="shop-img-preview flex-shrink-0">` : 
-                        `<div class="shop-img-preview bg-gray-50 flex items-center justify-center flex-shrink-0"><i data-lucide="shopping-bag" class="w-5 h-5 text-gray-300"></i></div>`}
-                        <div class="flex-1 min-w-0 flex items-center justify-between">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2">
-                                     <button onclick="event.stopPropagation(); toggleShopItem('${item.id}')" class="text-theme flex-shrink-0">${item.checked ? '<i data-lucide="check-square" class="w-5 h-5"></i>' : '<i data-lucide="square" class="w-5 h-5 text-gray-300"></i>'}</button>
-                                     <h4 class="font-bold text-gray-800 truncate ${item.checked ? 'text-gray-400 line-through' : ''}">${item.text}</h4>
-                                </div>
-                                <div class="flex items-center gap-2 mt-1 ml-7">
-                                    ${item.location ? `<a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] text-gray-500 flex items-center gap-0.5 hover:text-theme"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.location}</a>` : ''}
+            
+            if (isGalleryMode) {
+                container.className = "gallery-grid w-full"; let html = '';
+                trip.shoppingList.forEach(item => {
+                    const img = item.image || 'https://via.placeholder.com/150?text=No+Img';
+                    html += `<div class="gallery-item bg-white" onclick="openEditShopModal('${item.id}')"><img src="${img}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 right-0 bg-black/50 p-2 text-white backdrop-blur-sm"><p class="text-xs font-bold truncate">${item.text}</p><p class="text-[10px]">${item.price ? item.currency + ' ' + item.price : ''}</p></div></div>`;
+                });
+                container.innerHTML = html;
+            } else {
+                container.className = "space-y-3 w-full"; let html = '';
+                trip.shoppingList.forEach(item => {
+                    const mapLink = item.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}` : '#';
+                    const id = item.id;
+                    html += `
+                        <div class="swipe-item-container rounded-xl overflow-hidden">
+                            <div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
+                            <div class="swipe-content bg-white p-3 border border-gray-100 flex gap-3"
+                                onclick="openEditShopModal('${id}')"
+                                ontouchstart="handleTouchStart(event, this, '${id}', 'shop')" ontouchmove="handleTouchMove(event, this)" ontouchend="handleTouchEnd(event, this, '${id}', 'shop')">
+                                ${item.image ? `<img src="${item.image}" class="shop-img-preview flex-shrink-0">` : `<div class="shop-img-preview bg-gray-50 flex items-center justify-center flex-shrink-0"><i data-lucide="shopping-bag" class="w-5 h-5 text-gray-300"></i></div>`}
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start"><h4 class="font-bold text-gray-800 truncate">${item.text}</h4>${item.price ? `<span class="text-xs font-bold text-theme">${item.currency} ${item.price}</span>` : ''}</div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        ${item.location ? `<a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] text-gray-500 flex items-center gap-0.5 hover:text-theme"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.location}</a>` : ''}
+                                    </div>
                                 </div>
                             </div>
-                            ${priceInputHtml}
-                        </div>
-                    </div>`;
-                container.appendChild(el);
-            });
+                        </div>`;
+                });
+                container.innerHTML = html;
+                // Re-bind click event properly if needed, but standard onclick works here
+            }
             lucide.createIcons();
         }
-        function deleteShopItem(id) { const trip = getTrip(currentTripId); trip.shoppingList = trip.shoppingList.filter(i => i.id !== id); saveData(); renderShopping(); updateCostDisplay(); }
-        function toggleShopItem(id) { const trip = getTrip(currentTripId); const item = trip.shoppingList.find(i => i.id === id); if(item) { item.checked = !item.checked; saveData(); renderShopping(); updateCostDisplay(); }}
-        function updateShopPrice(id, price) { const trip = getTrip(currentTripId); const item = trip.shoppingList.find(i => i.id === id); if(item) { item.price = price; saveData(); updateCostDisplay(); }}
-        function updateShopCurrency(id, curr) { const trip = getTrip(currentTripId); const item = trip.shoppingList.find(i => i.id === id); if(item) { item.currency = curr; saveData(); updateCostDisplay(); }}
+        function deleteShopItem(id) { const trip = getTrip(currentTripId); trip.shoppingList = trip.shoppingList.filter(i => i.id !== id); saveData(); renderShopping(); updateCostDisplay(); updatePieChart(); }
 
-        // --- Modals & CRUD: Trip & Item ---
-        function openAddTripModal() { document.getElementById('modal-trip').classList.remove('hidden'); tempDaysCount = 3; document.getElementById('display-days-count').innerText = tempDaysCount + ' 天'; document.getElementById('input-trip-name').value = ''; document.getElementById('input-trip-city').value = ''; }
-        function adjustDays(d) { tempDaysCount += d; if(tempDaysCount < 1) tempDaysCount = 1; document.getElementById('display-days-count').innerText = tempDaysCount + ' 天'; }
-        function saveNewTrip() {
-            const title = document.getElementById('input-trip-name').value.trim();
-            const city = document.getElementById('input-trip-city').value.trim();
-            const date = document.getElementById('input-trip-date').value;
-            if (!title || !date) return alert('請填寫完整資訊');
-            const newTrip = { id: generateId(), title, city, startDate: date, createdAt: new Date().toISOString(), shoppingList: [], days: [] };
-            for(let i=0; i<tempDaysCount; i++) newTrip.days.push({ items: [] });
-            trips.push(newTrip); saveData(); renderHome(); closeModal('modal-trip');
-        }
-        function deleteTrip(id) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); }
-
-        function openAddItemModal() { editingItemId = null; document.getElementById('modal-item').classList.remove('hidden'); document.getElementById('item-time').value = '09:00'; document.getElementById('item-title').value = ''; document.getElementById('item-location').value = ''; document.getElementById('item-cost').value = ''; document.getElementById('item-currency').value = 'TWD'; document.getElementById('item-note').value = ''; document.getElementById('has-plan-b').checked = false; togglePlanBInputs(); document.getElementById('backup-title').value = ''; document.getElementById('backup-location').value = ''; }
-        function openEditItemModal(itemId) {
-            editingItemId = itemId; const trip = getTrip(currentTripId); const item = trip.days[currentDayIndex].items.find(i => i.id === itemId); if (!item) return;
-            document.getElementById('modal-item').classList.remove('hidden'); document.getElementById('item-time').value = item.time; document.getElementById('item-title').value = item.title; document.getElementById('item-location').value = item.location || ''; document.getElementById('item-cost').value = item.cost || ''; document.getElementById('item-currency').value = item.currency || 'TWD'; document.getElementById('item-note').value = item.note || ''; document.getElementById('item-type').value = item.type; document.getElementById('has-plan-b').checked = item.hasBackup || false; togglePlanBInputs(); document.getElementById('backup-title').value = item.backupTitle || ''; document.getElementById('backup-location').value = item.backupLocation || '';
-        }
-        function togglePlanBInputs() { const checked = document.getElementById('has-plan-b').checked; const container = document.getElementById('plan-b-inputs'); if (checked) container.classList.remove('hidden'); else container.classList.add('hidden'); }
-        async function saveItem() {
-            const time = document.getElementById('item-time').value; const title = document.getElementById('item-title').value.trim(); const type = document.getElementById('item-type').value; const location = document.getElementById('item-location').value.trim(); const cost = document.getElementById('item-cost').value; const currency = document.getElementById('item-currency').value; const note = document.getElementById('item-note').value.trim(); const hasBackup = document.getElementById('has-plan-b').checked; const backupTitle = document.getElementById('backup-title').value.trim(); const backupLocation = document.getElementById('backup-location').value.trim();
-            if (!title) return alert('請輸入標題');
-            
-            // Fetch coords for weather cache
-            let coords = null;
-            if(location) coords = await fetchCoordinates(location);
-
-            const trip = getTrip(currentTripId);
-            const newItem = { id: editingItemId || generateId(), time, title, type, location, cost, currency, note, hasBackup, backupTitle, backupLocation, lat: coords?.lat, lon: coords?.lon };
-            
-            if (editingItemId) { const idx = trip.days[currentDayIndex].items.findIndex(i => i.id === editingItemId); if (idx > -1) trip.days[currentDayIndex].items[idx] = newItem; } else { trip.days[currentDayIndex].items.push(newItem); }
-            saveData(); closeModal('modal-item'); renderTimeline(); updateCostDisplay();
-        }
-        function deleteItem(itemId) { const trip = getTrip(currentTripId); trip.days[currentDayIndex].items = trip.days[currentDayIndex].items.filter(i => i.id !== itemId); saveData(); renderTimeline(); updateCostDisplay(); }
-        
-        function renderDays() {
-            const trip = getTrip(currentTripId); const container = document.getElementById('day-selector'); container.innerHTML = '';
-            trip.days.forEach((day, index) => {
-                const btn = document.createElement('button'); const isActive = index === currentDayIndex; btn.className = `flex-none flex flex-col items-center justify-center w-12 h-14 rounded-xl transition-all ${isActive ? 'bg-theme text-white shadow-md' : 'bg-gray-100 text-gray-500'}`; btn.innerHTML = `<span class="text-xs font-bold">D${index + 1}</span><span class="text-[10px]">${getDayName(trip.startDate, index)}</span>`; btn.onclick = () => { currentDayIndex = index; renderDays(); renderTimeline(); startLiveTracking(); }; container.appendChild(btn);
+        // --- Itinerary ---
+        function renderTimeline() {
+            const trip = getTrip(currentTripId); const container = document.getElementById('timeline-container'); const emptyState = document.getElementById('timeline-empty'); container.innerHTML = '<div class="timeline-line"></div>';
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const items = trip.days[currentDayIndex].items.filter(i => !query || i.title.toLowerCase().includes(query) || (i.location && i.location.toLowerCase().includes(query)));
+            if (items.length === 0) { emptyState.classList.remove('hidden'); container.classList.add('hidden'); return; }
+            emptyState.classList.add('hidden'); container.classList.remove('hidden'); items.sort((a,b)=>a.time.localeCompare(b.time));
+            items.forEach(item => {
+                const el = document.createElement('div'); el.className = 'swipe-item-container relative mb-6 pl-9';
+                let iconName='map-pin';let colorClass='bg-blue-500'; if(item.type==='food'){iconName='utensils';colorClass='bg-orange-500'} if(item.type==='transport'){iconName='bus';colorClass='bg-indigo-500'} if(item.type==='stay'){iconName='bed';colorClass='bg-purple-500'} if(item.type==='flight'){iconName='plane';colorClass='bg-sky-500'}
+                const isPinned = item.isPinned ? 'pinned-item-card' : 'border-gray-100';
+                const id = item.id;
+                el.innerHTML = `
+                    <div class="absolute left-0 top-1 w-8 h-8 flex items-center justify-center z-10 bg-gray-50"><div class="w-7 h-7 rounded-full ${colorClass} text-white flex items-center justify-center shadow-md border-2 border-white"><i data-lucide="${iconName}" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="relative"><div class="swipe-action-bg rounded-xl"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div>
+                    <div id="card-${id}" class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border ${isPinned} flex flex-wrap gap-4 transition-all duration-500" onclick="openEditItemModal('${id}')" ontouchstart="handleTouchStart(event,this,'${id}','item')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${id}','item')">
+                        <div class="flex-1 min-w-[150px]">
+                            <div class="flex justify-between items-start mb-1"><span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>${item.isPinned ? '<i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>' : ''}</div>
+                            <h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>
+                            ${item.location ? `<div class="inline-flex items-center text-xs text-gray-500 gap-1"><i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i><span class="truncate">${item.location}</span></div>` : ''}
+                            ${item.note ? `<p class="mt-2 text-xs text-gray-500 line-clamp-2">${item.note}</p>` : ''}
+                        </div>
+                        ${item.hasBackup ? `<div class="w-full h-px bg-gray-100 sm:w-px sm:h-auto sm:bg-gray-200"></div><div class="flex-1 sm:max-w-[140px] min-w-[120px] bg-gray-50 rounded-lg p-2 border border-dashed border-gray-300 self-stretch flex flex-col justify-center"><span class="text-[9px] text-gray-400 font-bold uppercase mb-0.5">Plan B</span><h5 class="font-bold text-gray-600 text-sm leading-tight mb-1 break-words">${item.backupTitle}</h5></div>` : ''}
+                    </div></div>`;
+                container.appendChild(el);
             });
-            const addBtn = document.createElement('button'); addBtn.className = "flex-none flex flex-col items-center justify-center w-10 h-14 rounded-xl bg-gray-50 text-gray-300"; addBtn.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i>`; addBtn.onclick = () => { trip.days.push({ items: [] }); saveData(); renderDays(); }; container.appendChild(addBtn);
+            lucide.createIcons(); updateLiveStatus();
         }
 
         // --- Common ---
@@ -905,31 +647,22 @@
         
         function startLiveTracking(){if(liveTrackerInterval)clearInterval(liveTrackerInterval);updateLiveStatus();liveTrackerInterval=setInterval(updateLiveStatus,60000)}
         function stopLiveTracking(){if(liveTrackerInterval)clearInterval(liveTrackerInterval);document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'))}
-        function updateLiveStatus(){const trip=getTrip(currentTripId);if(!trip)return;const today=new Date();const start=new Date(trip.startDate);start.setHours(0,0,0,0);const viewDate=new Date(start);viewDate.setDate(viewDate.getDate()+currentDayIndex);if(viewDate.toDateString()!==today.toDateString()){document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));return}const nowTime=today.getHours()*60+today.getMinutes();const items=trip.days[currentDayIndex].items;let activeItemId=null;const sortedItems=items.map(i=>{const[h,m]=i.time.split(':').map(Number);return{...i,mins:h*60+m}}).sort((a,b)=>a.mins-b.mins);for(let i=0;i<sortedItems.length;i++){if(sortedItems[i].mins<=nowTime)activeItemId=sortedItems[i].id;else break}if(!activeItemId&&sortedItems.length>0){if(sortedItems[0].mins-nowTime<=60&&sortedItems[0].mins>nowTime)activeItemId=sortedItems[0].id}document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));if(activeItemId){const el=document.getElementById(`card-${activeItemId}`);if(el)el.classList.add('active-item-card')}}
-        function scrollToActiveItem(){setTimeout(()=>{const active=document.querySelector('.active-item-card');if(active)active.scrollIntoView({behavior:'smooth',block:'center'})},300)}
-        
-        function renderHome(){const container=document.getElementById('trip-list-container');container.innerHTML='';if(trips.length===0){container.innerHTML=`<div class="text-center mt-20 opacity-40"><p>尚未建立旅行</p></div>`;return}trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='swipe-item-container rounded-2xl shadow-sm overflow-hidden bg-white';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="swipe-action-bg"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div><div class="swipe-content bg-white p-4 border border-gray-100 flex justify-between items-center relative" onclick="openTrip('${trip.id}')" ontouchstart="handleTouchStart(event,this,'${trip.id}','trip')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${trip.id}','trip')"><div class="overflow-hidden"><h3 class="font-bold text-lg text-gray-800 truncate pr-4">${trip.title}</h3><div class="text-xs text-gray-500 mt-1 flex gap-3"><span><i data-lucide="calendar" class="w-3 h-3 inline"></i> ${dayCount} 天</span><span>NT$ ${totalCost.toLocaleString()}</span></div></div><i data-lucide="chevron-right" class="text-gray-300 w-5 h-5 flex-shrink-0"></i></div>`;container.appendChild(el)});lucide.createIcons()}
+        function updateLiveStatus(){const trip=getTrip(currentTripId);if(!trip)return;const today=new Date();const start=new Date(trip.startDate);start.setHours(0,0,0,0);const viewDate=new Date(start);viewDate.setDate(viewDate.getDate()+currentDayIndex);if(viewDate.toDateString()!==today.toDateString()){document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));return}const nowTime=today.getHours()*60+today.getMinutes();const items=trip.days[currentDayIndex].items;let activeItemId=null;const sortedItems=items.map(i=>{const[h,m]=i.time.split(':').map(Number);return{...i,mins:h*60+m}}).sort((a,b)=>a.mins-b.mins);for(let i=0;i<sortedItems.length;i++){if(sortedItems[i].mins<=nowTime)activeItemId=sortedItems[i].id;else break}if(!activeItemId&&sortedItems.length>0){if(sortedItems[0].mins-nowTime<=60&&sortedItems[0].mins>nowTime)activeItemId=sortedItems[0].id}document.querySelectorAll('.active-item-card').forEach(el=>el.classList.remove('active-item-card'));if(activeItemId){const el=document.getElementById(`card-${activeItemId}`);if(el)el.classList.add('active-item-card'); el.scrollIntoView({behavior:'smooth',block:'center'});}}
 
-        function renderTimeline(){
-            const trip=getTrip(currentTripId);const container=document.getElementById('timeline-container');const emptyState=document.getElementById('timeline-empty');container.innerHTML='<div class="timeline-line"></div>';const items=trip.days[currentDayIndex].items;if(items.length===0){emptyState.classList.remove('hidden');container.classList.add('hidden');return}emptyState.classList.add('hidden');container.classList.remove('hidden');items.sort((a,b)=>a.time.localeCompare(b.time));
-            items.forEach(item=>{
-                const el=document.createElement('div');el.className='swipe-item-container relative mb-6 pl-9';
-                let iconName='map-pin';let colorClass='bg-blue-500';if(item.type==='food'){iconName='utensils';colorClass='bg-orange-500'}if(item.type==='transport'){iconName='bus';colorClass='bg-indigo-500'}if(item.type==='stay'){iconName='bed';colorClass='bg-purple-500'}if(item.type==='flight'){iconName='plane';colorClass='bg-sky-500'}
-                const mapLink=item.location?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`:'#';
-                const backupMapLink=item.backupLocation?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.backupLocation)}`:'#';
-                const curr=item.currency||'TWD';const costDisplay=item.cost?`${curr} ${item.cost}`:'';
-                // Spot Weather DOM ID
-                const weatherId = `weather-${item.id}`;
-                el.innerHTML=`
-                    <div class="absolute left-0 top-1 w-8 h-8 flex items-center justify-center z-10 bg-gray-50"><div class="w-7 h-7 rounded-full ${colorClass} text-white flex items-center justify-center shadow-md border-2 border-white"><i data-lucide="${iconName}" class="w-3.5 h-3.5"></i></div></div>
-                    <div class="relative"><div class="swipe-action-bg rounded-xl"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div><div id="card-${item.id}" class="swipe-content bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 transition-all duration-500" onclick="openEditItemModal('${item.id}')" ontouchstart="handleTouchStart(event,this,'${item.id}','item')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${item.id}','item')"><div class="flex-1 min-w-[150px]"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-bold text-theme bg-theme-light px-1.5 py-0.5 rounded inline-block">${item.time}</span>${costDisplay?`<span class="text-xs font-bold text-gray-500">${costDisplay}</span>`:''}</div><h4 class="font-bold text-gray-800 text-base leading-tight mb-1 break-words">${item.title}</h4>${item.location?`<a href="${mapLink}" target="_blank" onclick="event.stopPropagation()" class="inline-flex items-center text-xs text-gray-500 hover:text-theme gap-1 bg-gray-50 px-2 py-1 rounded transition max-w-full truncate"><i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i><span class="truncate">${item.location}</span></a>`:''}${item.note?`<p class="mt-2 text-xs text-gray-500 line-clamp-2">${item.note}</p>`:''}
-                    <div id="${weatherId}"></div>
-                    </div>${item.hasBackup?`<div class="w-full h-px bg-gray-100 sm:w-px sm:h-auto sm:bg-gray-200"></div><div class="flex-1 sm:max-w-[140px] min-w-[120px] bg-gray-50 rounded-lg p-2 border border-dashed border-gray-300 self-stretch flex flex-col justify-center"><span class="text-[9px] text-gray-400 font-bold uppercase mb-0.5">Plan B</span><h5 class="font-bold text-gray-600 text-sm leading-tight mb-1 break-words">${item.backupTitle}</h5>${item.backupLocation?`<a href="${backupMapLink}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] text-gray-500 flex items-center gap-1 underline decoration-gray-300"><i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i> 地圖</a>`:''}</div>`:''}</div></div>`;
-                container.appendChild(el);
-                if(item.lat && item.lon) fetchWeatherForUI(item.lat, item.lon, { textId: weatherId });
-            });
-            lucide.createIcons();updateLiveStatus();
-        }
+        // --- Other ---
+        function renderHome(){const container=document.getElementById('trip-list-container');container.innerHTML='';if(trips.length===0){container.innerHTML=`<div class="text-center mt-20 opacity-40"><p>尚未建立旅行</p></div>`;return}trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='swipe-item-container rounded-2xl shadow-sm overflow-hidden bg-white';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="swipe-action-bg"><span class="text-white font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-5 h-5"></i> 刪除</span></div><div class="swipe-content bg-white p-4 border border-gray-100 flex justify-between items-center relative" onclick="openTrip('${trip.id}')" ontouchstart="handleTouchStart(event,this,'${trip.id}','trip')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${trip.id}','trip')"><div class="overflow-hidden"><h3 class="font-bold text-lg text-gray-800 truncate pr-4">${trip.title}</h3><div class="text-xs text-gray-500 mt-1 flex gap-3"><span><i data-lucide="calendar" class="w-3 h-3 inline"></i> ${dayCount} 天</span><span>NT$ ${totalCost.toLocaleString()}</span></div></div><i data-lucide="chevron-right" class="text-gray-300 w-5 h-5 flex-shrink-0"></i></div>`;container.appendChild(el)});lucide.createIcons()}
+        function updatePieChart() { const trip = getTrip(currentTripId); if (!trip) return; const categories = { '購物': 0, '飲食': 0, '交通': 0, '住宿': 0, '景點': 0, '其他': 0 }; trip.days.forEach(d => d.items.forEach(i => { const cost = convertToTWD(parseInt(i.cost), i.currency || 'TWD'); if (i.type === 'food') categories['飲食'] += cost; else if (i.type === 'transport') categories['交通'] += cost; else if (i.type === 'stay') categories['住宿'] += cost; else if (i.type === 'spot') categories['景點'] += cost; else categories['其他'] += cost; })); if (trip.shoppingList) { trip.shoppingList.forEach(i => { if (i.price) categories['購物'] += convertToTWD(parseInt(i.price), i.currency || 'TWD'); }); } const total = Object.values(categories).reduce((a,b)=>a+b, 0); document.getElementById('chart-total').innerText = total > 0 ? '$' + (total/1000).toFixed(1) + 'k' : '0'; const colors = { '購物': '#f472b6', '飲食': '#fb923c', '交通': '#6366f1', '住宿': '#a855f7', '景點': '#22c55e', '其他': '#94a3b8' }; let gradientStr = ''; let currentDeg = 0; let legendHtml = ''; for (const [cat, val] of Object.entries(categories)) { if (val > 0) { const percent = val / total; const deg = percent * 360; gradientStr += `${colors[cat]} ${currentDeg}deg ${currentDeg + deg}deg, `; currentDeg += deg; legendHtml += `<div class="flex items-center justify-between text-xs text-gray-600"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${colors[cat]}"></span>${cat}</span><span>${Math.round(percent*100)}%</span></div>`; } } if (!gradientStr) gradientStr = '#f3f4f6 0deg 360deg'; else gradientStr = gradientStr.slice(0, -2); const chart = document.getElementById('budget-pie'); if(chart) { chart.style.setProperty('--pie-gradient', gradientStr); document.getElementById('chart-legend').innerHTML = legendHtml; } }
+        function shareAsImage() { const target = document.getElementById('capture-target'); const btn = document.querySelector('button[onclick="shareAsImage()"]'); const originalIcon = btn.innerHTML; btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i>`; lucide.createIcons(); const originalHeight = target.style.height; const originalOverflow = target.style.overflow; target.style.height = 'auto'; target.style.overflow = 'visible'; target.style.backgroundColor = 'white'; html2canvas(target, { scale: 2 }).then(canvas => { const link = document.createElement('a'); link.download = '行程分享.png'; link.href = canvas.toDataURL(); link.click(); target.style.height = originalHeight; target.style.overflow = originalOverflow; target.style.backgroundColor = ''; btn.innerHTML = originalIcon; lucide.createIcons(); }); }
+        
+        // Packing List (Missing in prior v13 snippets)
+        function renderPacking() { const trip = getTrip(currentTripId); const container = document.getElementById('packing-list-container'); const progress = document.getElementById('packing-progress'); const total = trip.packingList.length; const checked = trip.packingList.filter(i => i.checked).length; progress.innerText = `${checked}/${total}`; container.innerHTML = ''; trip.packingList.forEach(item => { const el = document.createElement('div'); el.className = "swipe-item-container"; el.innerHTML = `<div class="swipe-action-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-3 flex items-center justify-between group bg-white border-b border-gray-50" ontouchstart="handleTouchStart(event,this,'${item.id}','pack')" ontouchmove="handleTouchMove(event,this)" ontouchend="handleTouchEnd(event,this,'${item.id}','pack')"><div class="flex items-center gap-3 cursor-pointer" onclick="togglePackItem('${item.id}')"><div class="w-5 h-5 rounded border ${item.checked ? 'bg-teal-500 border-teal-500' : 'border-gray-300'} flex items-center justify-center text-white transition">${item.checked ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}</div><span class="${item.checked ? 'text-gray-400 line-through' : 'text-gray-700 font-medium'}">${item.text}</span></div></div>`; container.appendChild(el); }); lucide.createIcons(); }
+        function togglePackItem(id) { const trip = getTrip(currentTripId); const item = trip.packingList.find(i => i.id === id); if(item) { item.checked = !item.checked; saveData(); renderPacking(); }}
+        function deletePackItem(id) { const trip = getTrip(currentTripId); trip.packingList = trip.packingList.filter(i => i.id !== id); saveData(); renderPacking(); }
+        function addPackItem() { const input = document.getElementById('new-pack-item'); const val = input.value.trim(); if(val) { const trip = getTrip(currentTripId); trip.packingList.push({ id: generateId(), text: val, checked: false }); saveData(); renderPacking(); input.value = ''; } }
+        // Update handleTouchEnd to include pack
+        const originalTouchEnd = handleTouchEnd;
+        handleTouchEnd = function(e,el,id,type){el.style.transition='transform 0.2s cubic-bezier(0.4,0,0.2,1)';const diff=touchCurrentX-touchStartX;if(isSwiping&&diff>100){el.style.transform=`translateX(100%)`;setTimeout(()=>{if(type==='trip')deleteTrip(id);if(type==='item')deleteItem(id);if(type==='shop')deleteShopItem(id);if(type==='pack')deletePackItem(id);},200)}else{el.style.transform=`translateX(0)`}isSwiping=false;touchStartX=0;touchCurrentX=0}
+
     </script>
 </body>
 </html>

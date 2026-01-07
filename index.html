@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 5.0</title>
+    <title>TravelFlow 6.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Font: Noto Serif for Muji feel -->
+    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
@@ -19,13 +19,13 @@
                 extend: {
                     colors: {
                         muji: {
-                            bg: '#F4F4F0',      /* 米白 */
-                            card: '#FFFFFF',    /* 白 */
-                            text: '#444444',    /* 炭灰 */
-                            border: '#D3D3D3',  /* 淺灰 */
-                            accent: '#7F0019',  /* 棗紅 (重點/刪除) */
-                            primary: '#505050', /* 深灰 (按鈕) */
-                            secondary: '#8E8E8E'/* 次要文字 */
+                            bg: '#F4F4F0',
+                            card: '#FFFFFF',
+                            text: '#444444',
+                            border: '#D3D3D3',
+                            accent: '#7F0019',
+                            primary: '#505050',
+                            secondary: '#8E8E8E'
                         }
                     },
                     fontFamily: {
@@ -38,152 +38,68 @@
     </script>
 
     <style>
-        :root {
-            --safe-bottom: env(safe-area-inset-bottom, 20px);
-        }
-
-        body {
-            background-color: #F4F4F0;
-            color: #444444;
-            overscroll-behavior-y: none;
-            -webkit-user-select: none;
-            user-select: none;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        /* Layout */
-        .app-layout { display: flex; height: 100%; width: 100%; overflow: hidden; }
-        .sidebar {
-            width: 68px; background: #EFEFEA; border-right: 1px solid #E0E0E0;
-            display: flex; flex-direction: column; align-items: center; padding-top: 1.5rem; z-index: 20; flex-shrink: 0;
-        }
+        :root { --safe-bottom: env(safe-area-inset-bottom, 20px); }
+        body { background-color: #F4F4F0; color: #444444; overscroll-behavior-y: none; -webkit-user-select: none; user-select: none; position: fixed; width: 100%; height: 100%; overflow: hidden; }
         
-        /* Muji Navigation Buttons */
-        .nav-btn {
-            width: 44px; height: 44px; border-radius: 8px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #999; margin-bottom: 1.2rem; transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-        .nav-btn.active {
-            background-color: #FFFFFF;
-            color: #333;
-            border: 1px solid #D0D0D0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        .app-layout { display: flex; height: 100%; width: 100%; overflow: hidden; }
+        .sidebar { width: 68px; background: #EFEFEA; border-right: 1px solid #E0E0E0; display: flex; flex-direction: column; align-items: center; padding-top: 1.5rem; z-index: 20; flex-shrink: 0; }
+        .nav-btn { width: 44px; height: 44px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; margin-bottom: 1.2rem; transition: all 0.3s ease; border: 1px solid transparent; }
+        .nav-btn.active { background-color: #FFFFFF; color: #333; border: 1px solid #D0D0D0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-btn i { width: 20px; height: 20px; }
         .nav-btn span { font-size: 9px; margin-top: 2px; font-weight: 500; }
-
+        
         .main-content { flex: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; background: #F4F4F0; }
-
-        /* Marquee */
-        .marquee-container {
-            background-color: #EAEAEA; color: #7F0019; overflow: hidden; white-space: nowrap;
-            padding: 8px 0; border-bottom: 1px solid #D0D0D0; flex-shrink: 0; height: 36px; display: flex; align-items: center;
-        }
+        .marquee-container { background-color: #EAEAEA; color: #7F0019; overflow: hidden; white-space: nowrap; padding: 8px 0; border-bottom: 1px solid #D0D0D0; flex-shrink: 0; height: 36px; display: flex; align-items: center; }
         .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; font-size: 12px; font-family: 'Noto Serif TC'; }
         .marquee-safe { background-color: #E6EAE6; color: #4A6E4A; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 12px; border-bottom: 1px solid #C0C0C0; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-
-        /* Scroll Area */
+        
         .scroll-area { flex: 1; overflow-y: auto; padding: 1.2rem; padding-bottom: 100px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-
-        /* Muji Card Style */
-        .muji-card {
-            background: #FFFFFF;
-            border: 1px solid #E0E0E0;
-            border-radius: 4px; /* More square */
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-        }
-
-        /* Swipe Item */
-        .swipe-item {
-            position: relative; overflow: hidden; touch-action: pan-y; margin-bottom: 12px;
-            transition: transform 0.2s; border-radius: 4px;
-        }
+        
+        .muji-card { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        
+        .swipe-item { position: relative; overflow: hidden; touch-action: pan-y; margin-bottom: 12px; transition: transform 0.2s; border-radius: 4px; }
         .swipe-content { position: relative; z-index: 10; background: white; transition: transform 0.15s ease-out; border: 1px solid #E0E0E0; border-radius: 4px; }
-        .swipe-bg {
-            position: absolute; inset: 0; background: #A33A3A; /* Muji Brick Red */
-            display: flex; align-items: center; justify-content: flex-end;
-            padding-right: 1.5rem; color: white; z-index: 1; border-radius: 4px;
-        }
-
-        /* Timeline Line */
-        .timeline-line {
-            position: absolute; left: 19px; top: 20px; bottom: 0; width: 1px;
-            background-color: #C0C0C0; z-index: 0; border-left: 1px dashed #C0C0C0; background: none;
-        }
-
-        /* Active Pulse (Subtle) */
+        .swipe-bg { position: absolute; inset: 0; background: #A33A3A; display: flex; align-items: center; justify-content: flex-end; padding-right: 1.5rem; color: white; z-index: 1; border-radius: 4px; }
+        
+        .timeline-line { position: absolute; left: 19px; top: 20px; bottom: 0; width: 1px; background: none; border-left: 1px dashed #C0C0C0; z-index: 0; }
         .item-past { opacity: 0.5; filter: grayscale(1); }
-        .item-active {
-            border-left: 4px solid #7F7F7F !important;
-            background: #FAFAFA !important;
-        }
-
-        /* Gallery */
+        .item-active { border-left: 4px solid #7F7F7F !important; background: #FAFAFA !important; }
+        
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .gallery-item { aspect-ratio: 1; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid #E0E0E0; }
         .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); padding: 8px; color: #333; border-top: 1px solid #E0E0E0; }
-
-        /* Modals */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(244,244,240,0.8); z-index: 50; /* Light overlay */
-            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);
-        }
-        .modal-box {
-            width: 90%; max-width: 400px; background: #FFFFFF; border-radius: 8px;
-            border: 1px solid #C0C0C0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            display: flex; flex-direction: column; max-height: 85vh;
-            animation: fadeIn 0.2s ease-out;
-        }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(244,244,240,0.8); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-box { width: 90%; max-width: 400px; background: #FFFFFF; border-radius: 8px; border: 1px solid #C0C0C0; box-shadow: 0 10px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; max-height: 85vh; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-
-        /* Inputs */
-        .muji-input {
-            width: 100%; padding: 10px; background: #F8F8F8; border: 1px solid #E0E0E0; border-radius: 4px;
-            outline: none; font-size: 14px; transition: border-color 0.2s;
-        }
+        
+        .muji-input { width: 100%; padding: 10px; background: #F8F8F8; border: 1px solid #E0E0E0; border-radius: 4px; outline: none; font-size: 14px; transition: border-color 0.2s; }
         .muji-input:focus { border-color: #888; background: #FFF; }
-
-        /* Hidden Export */
         #export-container { position: fixed; top: -9999px; left: 0; width: 600px; background: #F4F4F0; z-index: -5; font-family: 'Noto Sans TC'; }
     </style>
 </head>
 <body>
 
     <div id="app">
-        
         <!-- VIEW: HOME -->
         <div id="view-home" class="w-full h-full flex flex-col absolute inset-0 z-20 transition-transform duration-300 bg-muji-bg">
             <header class="p-6 pb-2 flex justify-between items-center shrink-0 border-b border-muji-border bg-muji-bg">
                 <div>
                     <h1 class="text-2xl font-serif font-bold text-muji-text tracking-widest">TravelFlow</h1>
-                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 5.0</p>
+                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.0</p>
                 </div>
-                <button onclick="openSettings()" class="p-2 text-muji-secondary hover:text-muji-text transition">
-                    <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
-                </button>
+                <button onclick="openSettings()" class="p-2 text-muji-secondary hover:text-muji-text transition"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i></button>
             </header>
-            
             <div id="trip-list" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
-
             <div class="p-5 shrink-0 pb-safe">
-                <button onclick="openAddTripModal()" class="w-full bg-muji-primary text-white py-4 rounded shadow-sm hover:bg-gray-700 transition flex items-center justify-center gap-2 text-sm tracking-widest">
-                    <i data-lucide="plus" class="w-4 h-4"></i> 新增旅行
-                </button>
+                <button onclick="openAddTripModal()" class="w-full bg-muji-primary text-white py-4 rounded shadow-sm hover:bg-gray-700 transition flex items-center justify-center gap-2 text-sm tracking-widest"><i data-lucide="plus" class="w-4 h-4"></i> 新增旅行</button>
             </div>
         </div>
 
         <!-- VIEW: DETAIL -->
         <div id="view-detail" class="w-full h-full bg-muji-bg absolute inset-0 z-30 translate-x-full transition-transform duration-300 flex flex-col">
-            
-            <!-- Top Bar -->
             <div class="bg-muji-bg border-b border-muji-border p-4 shrink-0 z-30">
                 <div class="flex items-center justify-between mb-3">
                     <button onclick="goBack()" class="p-1 text-muji-secondary hover:text-muji-text"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
@@ -193,54 +109,26 @@
                     </div>
                     <button onclick="openAddTripModal(true)" class="p-1 text-muji-secondary hover:text-muji-text"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
                 </div>
-                
-                <!-- Dual Clocks -->
                 <div class="flex justify-between items-center bg-white border border-muji-border rounded px-3 py-2 text-xs text-muji-secondary mb-1">
-                    <div class="flex items-center gap-1">
-                        <span class="font-bold text-muji-text">🇹🇼 TW</span>
-                        <span id="clock-tw" class="font-mono">00:00:00</span>
-                    </div>
+                    <div class="flex items-center gap-1"><span class="font-bold text-muji-text">🇹🇼 TW</span><span id="clock-tw" class="font-mono">00:00:00</span></div>
                     <div class="h-3 w-px bg-muji-border"></div>
-                    <div class="flex items-center gap-1">
-                        <span class="font-bold text-muji-text">📍 LOC</span>
-                        <span id="clock-loc" class="font-mono">00:00:00</span>
-                    </div>
+                    <div class="flex items-center gap-1"><span class="font-bold text-muji-text">📍 LOC</span><span id="clock-loc" class="font-mono">00:00:00</span></div>
                 </div>
             </div>
 
-            <!-- Global Marquee -->
-            <div id="marquee-wrapper" class="marquee-container hidden">
-                <div id="marquee-content" class="marquee-text"></div>
-            </div>
-            <div id="marquee-safe" class="marquee-safe hidden">
-                <span class="tracking-widest">CHECKLIST COMPLETED</span>
-            </div>
+            <div id="marquee-wrapper" class="marquee-container hidden"><div id="marquee-content" class="marquee-text"></div></div>
+            <div id="marquee-safe" class="marquee-safe hidden"><span class="tracking-widest">CHECKLIST COMPLETED</span></div>
 
-            <!-- Main Layout -->
             <div class="app-layout">
-                
-                <!-- Sidebar -->
                 <div class="sidebar">
-                    <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn active">
-                        <i data-lucide="map"></i><span>行程</span>
-                    </button>
-                    <button onclick="switchTab('shopping')" id="nav-shopping" class="nav-btn">
-                        <i data-lucide="shopping-bag"></i><span>購物</span>
-                    </button>
-                    <button onclick="switchTab('packing')" id="nav-packing" class="nav-btn">
-                        <i data-lucide="check-square"></i><span>行李</span>
-                    </button>
+                    <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn active"><i data-lucide="map"></i><span>行程</span></button>
+                    <button onclick="switchTab('shopping')" id="nav-shopping" class="nav-btn"><i data-lucide="shopping-bag"></i><span>購物</span></button>
+                    <button onclick="switchTab('packing')" id="nav-packing" class="nav-btn"><i data-lucide="check-square"></i><span>行李</span></button>
                     <div class="mt-auto mb-20">
-                        <button onclick="exportAll()" class="nav-btn" style="border-top: 1px solid #E0E0E0; border-radius: 0;">
-                            <i data-lucide="download"></i><span>匯出</span>
-                        </button>
+                        <button onclick="exportAll()" class="nav-btn" style="border-top: 1px solid #E0E0E0; border-radius: 0;"><i data-lucide="download"></i><span>匯出</span></button>
                     </div>
                 </div>
-
-                <!-- Content -->
                 <div class="main-content">
-                    
-                    <!-- 1. ITINERARY -->
                     <div id="tab-itinerary" class="flex flex-col h-full w-full">
                         <div class="p-3 bg-muji-bg border-b border-muji-border shrink-0 flex items-center gap-2">
                             <div class="flex-1 flex gap-2 overflow-x-auto no-scrollbar" id="day-selector"></div>
@@ -249,8 +137,6 @@
                         </div>
                         <div id="itinerary-list" class="scroll-area"></div>
                     </div>
-
-                    <!-- 2. SHOPPING -->
                     <div id="tab-shopping" class="flex flex-col h-full hidden w-full">
                         <div class="p-3 bg-muji-bg border-b border-muji-border flex justify-between items-center shrink-0">
                             <span class="text-xs text-muji-secondary tracking-widest">SHOPPING LIST</span>
@@ -262,33 +148,22 @@
                         </div>
                         <div id="shopping-list" class="scroll-area"></div>
                     </div>
-
-                    <!-- 3. PACKING -->
                     <div id="tab-packing" class="flex flex-col h-full hidden w-full">
-                        <div class="p-3 bg-white border-b border-muji-border text-muji-secondary text-xs text-center tracking-widest">
-                            ITEMS TO PACK
-                        </div>
+                        <div class="p-3 bg-white border-b border-muji-border text-muji-secondary text-xs text-center tracking-widest">ITEMS TO PACK</div>
                         <div id="packing-list" class="scroll-area"></div>
                     </div>
-
                 </div>
             </div>
-
-            <!-- Unified FAB -->
             <div class="absolute bottom-8 right-6 z-40 pb-safe">
-                <button onclick="handleFab()" class="w-14 h-14 bg-muji-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition active:scale-95">
-                    <i data-lucide="plus" class="w-6 h-6"></i>
-                </button>
+                <button onclick="handleFab()" class="w-14 h-14 bg-muji-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-700 transition active:scale-95"><i data-lucide="plus" class="w-6 h-6"></i></button>
             </div>
-
         </div>
     </div>
 
-    <!-- Hidden Export -->
+    <!-- EXPORT CONTAINER -->
     <div id="export-container"></div>
 
-    <!-- === MODALS === -->
-
+    <!-- MODALS -->
     <!-- Trip Modal -->
     <div id="modal-trip" class="modal-overlay hidden">
         <div class="modal-box p-6 relative">
@@ -296,23 +171,9 @@
             <h3 class="text-lg font-bold mb-6 text-center tracking-widest text-muji-text">TRAVEL PLAN</h3>
             <input type="hidden" id="trip-id">
             <div class="space-y-4 overflow-y-auto">
-                <div>
-                    <label class="text-xs text-muji-secondary block mb-1">名稱 NAME</label>
-                    <input type="text" id="trip-name" class="muji-input">
-                </div>
-                <div>
-                    <label class="text-xs text-muji-secondary block mb-1">地點 LOCATION (自動偵測時區)</label>
-                    <input type="text" id="trip-loc" class="muji-input" placeholder="e.g. Tokyo, Paris">
-                </div>
-                <div class="flex gap-3">
-                    <div class="flex-1">
-                        <label class="text-xs text-muji-secondary block mb-1">日期 DATE</label>
-                        <input type="date" id="trip-date" class="muji-input">
-                    </div>
-                </div>
-                <!-- Hidden timezone, calculated automatically -->
-                <input type="hidden" id="trip-tz" value="Asia/Taipei">
-                
+                <div><label class="text-xs text-muji-secondary block mb-1">名稱 NAME</label><input type="text" id="trip-name" class="muji-input"></div>
+                <div><label class="text-xs text-muji-secondary block mb-1">地點 LOCATION</label><input type="text" id="trip-loc" class="muji-input" placeholder="e.g. Tokyo"></div>
+                <div><label class="text-xs text-muji-secondary block mb-1">日期 DATE</label><input type="date" id="trip-date" class="muji-input"></div>
                 <div class="flex items-center justify-between border-t border-muji-border pt-4">
                     <span class="text-xs text-muji-secondary">天數 DAYS</span>
                     <div class="flex items-center gap-4">
@@ -322,23 +183,16 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-6">
-                <button onclick="saveTrip()" class="w-full py-3 bg-muji-primary text-white text-sm tracking-widest rounded hover:bg-gray-700 transition">SAVE</button>
-            </div>
+            <div class="mt-6"><button onclick="saveTrip()" class="w-full py-3 bg-muji-primary text-white text-sm tracking-widest rounded hover:bg-gray-700 transition">SAVE</button></div>
         </div>
     </div>
 
     <!-- Itinerary Item Modal -->
     <div id="modal-item" class="modal-overlay hidden">
         <div class="modal-box">
-            <div class="p-4 border-b border-muji-border flex justify-between items-center">
-                <h3 class="font-bold text-muji-text tracking-wide">EVENT DETAILS</h3>
-                <button onclick="closeModal('modal-item')" class="text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
+            <div class="p-4 border-b border-muji-border flex justify-between items-center"><h3 class="font-bold text-muji-text tracking-wide">EVENT DETAILS</h3><button onclick="closeModal('modal-item')" class="text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button></div>
             <div class="flex-1 overflow-y-auto p-5 space-y-4">
                 <input type="hidden" id="item-id">
-                
-                <!-- Visual Types -->
                 <div class="grid grid-cols-6 gap-2 mb-2">
                     <button onclick="selectType('flight')" id="type-flight" class="type-btn p-2 border border-muji-border rounded text-muji-secondary hover:bg-gray-100 flex justify-center"><i data-lucide="plane" class="w-4 h-4"></i></button>
                     <button onclick="selectType('transport')" id="type-transport" class="type-btn p-2 border border-muji-border rounded text-muji-secondary hover:bg-gray-100 flex justify-center"><i data-lucide="bus" class="w-4 h-4"></i></button>
@@ -348,78 +202,48 @@
                     <button onclick="selectType('stay')" id="type-stay" class="type-btn p-2 border border-muji-border rounded text-muji-secondary hover:bg-gray-100 flex justify-center"><i data-lucide="bed" class="w-4 h-4"></i></button>
                 </div>
                 <input type="hidden" id="item-type" value="activity">
-
                 <div class="flex gap-3">
-                    <div class="w-1/2">
-                        <label class="text-[10px] text-muji-secondary block mb-1">DAY</label>
-                        <select id="item-day" class="muji-input"></select>
-                    </div>
-                    <div class="w-1/2">
-                        <label class="text-[10px] text-muji-secondary block mb-1">TIME</label>
-                        <input type="time" id="item-time" class="muji-input">
-                    </div>
+                    <div class="w-1/2"><label class="text-[10px] text-muji-secondary block mb-1">DAY</label><select id="item-day" class="muji-input"></select></div>
+                    <div class="w-1/2"><label class="text-[10px] text-muji-secondary block mb-1">TIME</label><input type="time" id="item-time" class="muji-input"></div>
                 </div>
-                
                 <input type="text" id="item-title" placeholder="Title" class="muji-input font-bold text-lg">
-                
                 <div class="p-3 border border-muji-border rounded bg-gray-50">
-                    <label class="text-[10px] text-muji-secondary block mb-1">COST (AUTO CONVERT)</label>
+                    <label class="text-[10px] text-muji-secondary block mb-1">COST</label>
                     <div class="flex gap-2">
-                        <select id="item-currency" class="muji-input w-24" onchange="calcItemTWD()">
-                            <option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option><option value="HKD">HKD</option>
-                        </select>
+                        <select id="item-currency" class="muji-input w-24" onchange="calcItemTWD()"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option><option value="HKD">HKD</option></select>
                         <input type="number" id="item-cost" placeholder="0" class="muji-input flex-1" onkeyup="calcItemTWD()">
                     </div>
                     <div class="text-right text-xs text-muji-text mt-1">≈ NT$ <span id="item-twd-display">0</span></div>
                 </div>
-
-                <div class="flex items-center gap-2 mb-2">
-                    <i data-lucide="map-pin" class="w-4 h-4 text-muji-secondary"></i>
-                    <input type="text" id="item-loc" placeholder="Location" class="muji-input border-0 border-b border-muji-border rounded-none bg-transparent px-0">
-                </div>
-                
+                <div class="flex items-center gap-2 mb-2"><i data-lucide="map-pin" class="w-4 h-4 text-muji-secondary"></i><input type="text" id="item-loc" placeholder="Location" class="muji-input border-0 border-b border-muji-border rounded-none bg-transparent px-0"></div>
                 <textarea id="item-note" rows="2" placeholder="Notes..." class="muji-input"></textarea>
             </div>
-            <div class="p-4 border-t border-muji-border">
-                <button onclick="saveItem()" class="w-full py-3 bg-muji-primary text-white text-sm tracking-widest rounded hover:bg-gray-700 transition">CONFIRM</button>
-            </div>
+            <div class="p-4 border-t border-muji-border"><button onclick="saveItem()" class="w-full py-3 bg-muji-primary text-white text-sm tracking-widest rounded hover:bg-gray-700 transition">CONFIRM</button></div>
         </div>
     </div>
 
     <!-- Shop Modal -->
     <div id="modal-shop" class="modal-overlay hidden">
         <div class="modal-box">
-            <div class="p-4 border-b border-muji-border flex justify-between items-center">
-                <h3 class="font-bold text-muji-text tracking-wide">ADD PURCHASE</h3>
-                <button onclick="closeModal('modal-shop')" class="text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
+            <div class="p-4 border-b border-muji-border flex justify-between items-center"><h3 class="font-bold text-muji-text tracking-wide">ADD PURCHASE</h3><button onclick="closeModal('modal-shop')" class="text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button></div>
             <div class="flex-1 overflow-y-auto p-5 space-y-4">
                 <input type="hidden" id="shop-id">
                 <input type="text" id="shop-name" placeholder="Item Name" class="muji-input font-bold">
-                
                 <div class="p-3 border border-muji-border rounded bg-gray-50">
                     <div class="flex gap-2">
-                        <select id="shop-curr" class="muji-input w-24" onchange="calcShopTWD()">
-                            <option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option><option value="HKD">HKD</option>
-                        </select>
+                        <select id="shop-curr" class="muji-input w-24" onchange="calcShopTWD()"><option value="TWD">TWD</option><option value="JPY">JPY</option><option value="USD">USD</option><option value="KRW">KRW</option><option value="EUR">EUR</option><option value="HKD">HKD</option></select>
                         <input type="number" id="shop-price" placeholder="Price" class="muji-input flex-1" onkeyup="calcShopTWD()">
                     </div>
                     <div class="text-right text-xs text-muji-text mt-1">≈ NT$ <span id="shop-twd-display">0</span></div>
                 </div>
-
                 <input type="text" id="shop-loc" placeholder="Location" class="muji-input">
-                
                 <div class="relative h-32 bg-gray-50 rounded border border-dashed border-muji-border flex items-center justify-center overflow-hidden">
                     <input type="file" id="shop-img-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImage(this)">
                     <img id="shop-img-preview" class="absolute inset-0 w-full h-full object-cover hidden">
-                    <div id="shop-img-placeholder" class="text-center text-muji-secondary">
-                        <i data-lucide="camera" class="w-6 h-6 mx-auto mb-1"></i><span class="text-xs">Photo</span>
-                    </div>
+                    <div id="shop-img-placeholder" class="text-center text-muji-secondary"><i data-lucide="camera" class="w-6 h-6 mx-auto mb-1"></i><span class="text-xs">Photo</span></div>
                 </div>
             </div>
-            <div class="p-4 border-t border-muji-border">
-                <button onclick="saveShop()" class="w-full py-3 bg-muji-primary text-white text-sm tracking-widest rounded hover:bg-gray-700 transition">ADD</button>
-            </div>
+            <div class="p-4 border-t border-muji-border"><button onclick="saveShop()" class="w-full py-3 bg-muji-primary text-white text-sm tracking-widest rounded hover:bg-gray-700 transition">ADD</button></div>
         </div>
     </div>
 
@@ -433,13 +257,13 @@
         </div>
     </div>
 
-    <!-- Settings -->
+    <!-- Settings Modal -->
     <div id="modal-settings" class="modal-overlay hidden">
         <div class="modal-box p-5 relative">
             <button onclick="closeModal('modal-settings')" class="absolute top-4 right-4 text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 class="text-xl font-bold mb-4 text-muji-text">Rates</h3>
             <div class="mb-4">
-                <button onclick="fetchRates()" class="text-xs bg-gray-100 text-muji-text px-3 py-2 rounded mb-4 w-full border border-muji-border hover:bg-white"><i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> Update Rates</button>
+                <button id="btn-update-rates" onclick="fetchRates()" class="text-xs bg-gray-100 text-muji-text px-3 py-2 rounded mb-4 w-full border border-muji-border hover:bg-white"><i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> Update Rates</button>
                 <div class="grid grid-cols-2 gap-3 text-sm">
                     <div class="flex justify-between bg-gray-50 p-2 rounded border border-muji-border"><span class="font-bold">JPY</span><input id="rate-JPY" type="number" class="w-16 bg-transparent text-right outline-none" onchange="saveConfig()"></div>
                     <div class="flex justify-between bg-gray-50 p-2 rounded border border-muji-border"><span class="font-bold">USD</span><input id="rate-USD" type="number" class="w-16 bg-transparent text-right outline-none" onchange="saveConfig()"></div>
@@ -453,8 +277,8 @@
 
     <script>
         // --- DATA & CONFIG ---
-        let trips = JSON.parse(localStorage.getItem('tf5_trips')) || [];
-        let config = JSON.parse(localStorage.getItem('tf5_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 } };
+        let trips = JSON.parse(localStorage.getItem('tf6_trips')) || [];
+        let config = JSON.parse(localStorage.getItem('tf6_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 } };
         let defaultPacking = ["護照", "身分證", "現金", "信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "雨傘/雨衣", "面紙/濕紙巾"];
         
         let currentTripId = null;
@@ -467,31 +291,26 @@
         let editingShopId = null;
         let clockInterval = null;
 
-        // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             renderHome();
             loadSettings();
             fetchRates();
-            
-            // Touch Swipe
             document.addEventListener('touchstart', handleTouchStart, false);
             document.addEventListener('touchmove', handleTouchMove, false);
             document.addEventListener('touchend', handleTouchEnd, false);
-
-            // Clocks
             updateClocks();
             clockInterval = setInterval(updateClocks, 1000);
         });
 
-        function saveData() { localStorage.setItem('tf5_trips', JSON.stringify(trips)); }
+        function saveData() { localStorage.setItem('tf6_trips', JSON.stringify(trips)); }
         function saveConfig() { 
             config.rates.JPY = parseFloat(document.getElementById('rate-JPY').value);
             config.rates.USD = parseFloat(document.getElementById('rate-USD').value);
             config.rates.KRW = parseFloat(document.getElementById('rate-KRW').value);
             config.rates.EUR = parseFloat(document.getElementById('rate-EUR').value);
             config.rates.HKD = parseFloat(document.getElementById('rate-HKD').value);
-            localStorage.setItem('tf5_config', JSON.stringify(config)); 
+            localStorage.setItem('tf6_config', JSON.stringify(config)); 
         }
         function loadSettings() {
             document.getElementById('rate-JPY').value = config.rates.JPY;
@@ -503,28 +322,23 @@
         function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
         function getTrip() { return trips.find(t => t.id === currentTripId); }
 
-        // --- TIMEZONE DETECTOR (Mock) ---
+        // --- TIMEZONE ---
         function detectTimezone(location) {
-            // Simple keyword matching for demo purposes
             const loc = location.toLowerCase();
-            if (loc.includes('tokyo') || loc.includes('osaka') || loc.includes('japan') || loc.includes('kyoto') || loc.includes('日本') || loc.includes('東京')) return 'Asia/Tokyo';
-            if (loc.includes('seoul') || loc.includes('korea') || loc.includes('韓國') || loc.includes('首爾')) return 'Asia/Seoul';
-            if (loc.includes('bangkok') || loc.includes('thailand') || loc.includes('泰國')) return 'Asia/Bangkok';
-            if (loc.includes('london') || loc.includes('uk') || loc.includes('英國')) return 'Europe/London';
-            if (loc.includes('paris') || loc.includes('france') || loc.includes('法國')) return 'Europe/Paris';
-            if (loc.includes('new york') || loc.includes('usa') || loc.includes('美國')) return 'America/New_York';
-            if (loc.includes('los angeles') || loc.includes('la')) return 'America/Los_Angeles';
-            return 'Asia/Taipei'; // Default
+            if (loc.includes('tokyo') || loc.includes('osaka') || loc.includes('japan') || loc.includes('kyoto')) return 'Asia/Tokyo';
+            if (loc.includes('seoul') || loc.includes('korea')) return 'Asia/Seoul';
+            if (loc.includes('bangkok') || loc.includes('thailand')) return 'Asia/Bangkok';
+            if (loc.includes('london') || loc.includes('uk')) return 'Europe/London';
+            if (loc.includes('paris') || loc.includes('france')) return 'Europe/Paris';
+            if (loc.includes('new york') || loc.includes('usa')) return 'America/New_York';
+            return 'Asia/Taipei';
         }
 
         // --- CLOCKS ---
         function updateClocks() {
             const now = new Date();
-            // TW
             const tw = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', second: '2-digit' });
             document.getElementById('clock-tw').innerText = tw;
-            
-            // LOC
             const trip = getTrip();
             if(trip) {
                 const tz = trip.timezone || 'Asia/Taipei';
@@ -536,40 +350,45 @@
 
         function updateActiveItems(tz) {
             if(activeTab !== 'itinerary') return;
-            // Get local time in destination
             const nowString = new Date().toLocaleString('en-US', { timeZone: tz });
             const locDate = new Date(nowString);
             const currentMins = locDate.getHours() * 60 + locDate.getMinutes();
-
             const items = document.querySelectorAll('.swipe-item');
             items.forEach(el => {
-                // We need to store time in element
-                // NOTE: This logic assumes current day view is "Today" in destination.
-                // For a real app, date comparison is needed.
-                // Assuming activeDayIndex logic is handled or this is just visual aid for time matching.
                 const timeStr = el.getAttribute('data-time');
                 if(timeStr) {
                     const [h, m] = timeStr.split(':').map(Number);
                     const itemMins = h * 60 + m;
                     el.querySelector('.swipe-content').classList.remove('item-active', 'item-past');
-                    if (currentMins >= itemMins + 90) { // 1.5 hr duration assumed
-                        el.querySelector('.swipe-content').classList.add('item-past');
-                    } else if (currentMins >= itemMins && currentMins < itemMins + 90) {
-                        el.querySelector('.swipe-content').classList.add('item-active');
-                    }
+                    if (currentMins >= itemMins + 90) { el.querySelector('.swipe-content').classList.add('item-past'); } 
+                    else if (currentMins >= itemMins && currentMins < itemMins + 90) { el.querySelector('.swipe-content').classList.add('item-active'); }
                 }
             });
         }
 
-        // --- RATES ---
+        // --- RATES (Open Exchange Rates - Free Endpoint) ---
         async function fetchRates() {
-            try { const res = await fetch('https://api.exchangerate-api.com/v4/latest/TWD'); const data = await res.json();
-                if(data.rates) {
-                    config.rates.JPY = 1 / data.rates.JPY; config.rates.USD = 1 / data.rates.USD;
-                    config.rates.KRW = 1 / data.rates.KRW; config.rates.EUR = 1 / data.rates.EUR; config.rates.HKD = 1 / data.rates.HKD;
+            const btn = document.getElementById('btn-update-rates');
+            if(btn) btn.innerHTML = '<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> Updating...';
+            lucide.createIcons();
+            
+            try { 
+                const res = await fetch('https://open.er-api.com/v6/latest/TWD'); 
+                const data = await res.json();
+                if(data && data.rates) {
+                    config.rates.JPY = 1 / data.rates.JPY; 
+                    config.rates.USD = 1 / data.rates.USD;
+                    config.rates.KRW = 1 / data.rates.KRW; 
+                    config.rates.EUR = 1 / data.rates.EUR; 
+                    config.rates.HKD = 1 / data.rates.HKD;
                     saveConfig(); loadSettings(); updateCostDisplay();
+                    if(btn) btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Updated';
                 }
-            } catch(e) {}
+            } catch(e) { 
+                console.error(e);
+                if(btn) btn.innerHTML = '<i data-lucide="x" class="w-3 h-3 inline"></i> Failed';
+            }
+            setTimeout(() => { if(btn) { btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> Update Rates'; lucide.createIcons(); } }, 2000);
         }
         function convertToTWD(amount, currency) { if(!amount) return 0; const rate = config.rates[currency] || 1; return currency === 'TWD' ? Math.round(amount) : Math.round(amount * rate); }
         function calcItemTWD() { const c = document.getElementById('item-currency').value; const p = document.getElementById('item-cost').value; document.getElementById('item-twd-display').innerText = convertToTWD(p, c).toLocaleString(); }
@@ -581,7 +400,7 @@
             return total;
         }
 
-        // --- NAVIGATION ---
+        // --- NAV ---
         function openTrip(id) {
             currentTripId = id;
             document.getElementById('view-home').classList.add('-translate-x-full');
@@ -618,37 +437,23 @@
                 daysHtml += `<button onclick="activeDayIndex=${idx}; renderItinerary()" class="shrink-0 px-4 py-1.5 rounded text-sm font-bold border transition ${activeClass}">Day ${idx+1}</button>`;
             });
             dayContainer.innerHTML = daysHtml;
-            
             listContainer.innerHTML = '';
-            if (!trip.days[activeDayIndex] || trip.days[activeDayIndex].items.length === 0) {
-                listContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-300"><i data-lucide="coffee" class="w-10 h-10 mb-2 opacity-50"></i><p class="text-xs">No Events</p></div>`;
-            } else {
+            if (!trip.days[activeDayIndex] || trip.days[activeDayIndex].items.length === 0) { listContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-300"><i data-lucide="coffee" class="w-10 h-10 mb-2 opacity-50"></i><p class="text-xs">No Events</p></div>`; } 
+            else {
                 trip.days[activeDayIndex].items.sort((a,b) => a.time.localeCompare(b.time));
                 trip.days[activeDayIndex].items.forEach(item => {
                     const el = document.createElement('div'); el.className = "swipe-item"; el.setAttribute('data-time', item.time);
-                    let icon='map-pin', color='text-gray-500';
+                    let icon='map-pin';
                     if(item.type==='flight') icon='plane'; if(item.type==='transport') icon='bus'; if(item.type==='food') icon='utensils';
                     if(item.type==='activity') icon='ticket'; if(item.type==='shopping') icon='shopping-bag'; if(item.type==='stay') icon='bed';
-                    
                     el.innerHTML = `
                         <div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
-                        <div class="swipe-content p-4 shadow-sm"
-                             ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'item')"
-                             onclick="openItemModal('${item.id}')">
+                        <div class="swipe-content p-4 shadow-sm" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'item')" onclick="openItemModal('${item.id}')">
                             <div class="flex gap-3">
-                                <div class="flex flex-col items-center gap-1 w-10 shrink-0 pt-1">
-                                    <span class="font-mono text-sm font-bold text-muji-text">${item.time}</span>
-                                    <i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i>
-                                </div>
-                                <div class="flex-1 min-w-0 border-l border-muji-border pl-3">
-                                    <h4 class="font-bold text-muji-text truncate">${item.title}</h4>
-                                    ${item.loc ? `<div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.loc}</div>` : ''}
-                                    ${item.cost ? `<div class="text-xs text-muji-secondary mt-1 font-mono">${item.currency} ${item.cost}</div>` : ''}
-                                    ${item.note ? `<p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded">${item.note}</p>` : ''}
-                                </div>
+                                <div class="flex flex-col items-center gap-1 w-10 shrink-0 pt-1"><span class="font-mono text-sm font-bold text-muji-text">${item.time}</span><i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i></div>
+                                <div class="flex-1 min-w-0 border-l border-muji-border pl-3"><h4 class="font-bold text-muji-text truncate">${item.title}</h4>${item.loc ? `<div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.loc}</div>` : ''}${item.cost ? `<div class="text-xs text-muji-secondary mt-1 font-mono">${item.currency} ${item.cost}</div>` : ''}${item.note ? `<p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded">${item.note}</p>` : ''}</div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                     listContainer.appendChild(el);
                 });
             }
@@ -665,18 +470,13 @@
                     trip.shopping.forEach(item => {
                         const div = document.createElement('div'); div.className = "gallery-item";
                         div.innerHTML = `<img src="${item.img || 'https://via.placeholder.com/150?text=No+Img'}" class="gallery-img"><div class="gallery-overlay"><p class="font-bold text-xs truncate">${item.name}</p><p class="text-[10px]">NT$ ${convertToTWD(item.price, item.curr)}</p></div>`;
-                        div.onclick = () => openShopModal(item.id);
-                        list.appendChild(div);
+                        div.onclick = () => openShopModal(item.id); list.appendChild(div);
                     });
                 } else {
                     list.className = "scroll-area space-y-3";
                     trip.shopping.forEach(item => {
                         const el = document.createElement('div'); el.className = "swipe-item";
-                        el.innerHTML = `<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white ml-auto"></i></div>
-                        <div class="swipe-content p-3 flex gap-3 items-center" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'shop')" onclick="openShopModal('${item.id}')">
-                            <div class="w-10 h-10 bg-gray-100 rounded flex-shrink-0 overflow-hidden border border-muji-border">${item.img ? `<img src="${item.img}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-5 h-5 m-2.5 text-gray-400"></i>`}</div>
-                            <div class="flex-1 min-w-0"><div class="flex justify-between"><h4 class="font-bold text-sm text-muji-text truncate">${item.name}</h4><span class="text-xs font-bold text-muji-secondary">NT$ ${convertToTWD(item.price, item.curr)}</span></div><div class="text-[10px] text-gray-400 mt-0.5">${item.loc || ''} · ${item.curr} ${item.price}</div></div>
-                        </div>`;
+                        el.innerHTML = `<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white ml-auto"></i></div><div class="swipe-content p-3 flex gap-3 items-center" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'shop')" onclick="openShopModal('${item.id}')"><div class="w-10 h-10 bg-gray-100 rounded flex-shrink-0 overflow-hidden border border-muji-border">${item.img ? `<img src="${item.img}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-5 h-5 m-2.5 text-gray-400"></i>`}</div><div class="flex-1 min-w-0"><div class="flex justify-between"><h4 class="font-bold text-sm text-muji-text truncate">${item.name}</h4><span class="text-xs font-bold text-muji-secondary">NT$ ${convertToTWD(item.price, item.curr)}</span></div><div class="text-[10px] text-gray-400 mt-0.5">${item.loc || ''} · ${item.curr} ${item.price}</div></div></div>`;
                         list.appendChild(el);
                     });
                 }
@@ -698,12 +498,8 @@
         function togglePack(id) { const trip = getTrip(); const item = trip.packing.find(i => i.id === id); item.checked = !item.checked; saveData(); renderPacking(); updateMarquee(); }
         function updateMarquee() {
             const trip = getTrip(); const unchecked = trip.packing.filter(p => !p.checked).map(p => p.text);
-            if(unchecked.length > 0) {
-                document.getElementById('marquee-wrapper').classList.remove('hidden'); document.getElementById('marquee-safe').classList.add('hidden');
-                document.getElementById('marquee-content').innerText = "NOT PACKED: " + unchecked.join(" · ");
-            } else {
-                document.getElementById('marquee-wrapper').classList.add('hidden'); document.getElementById('marquee-safe').classList.remove('hidden');
-            }
+            if(unchecked.length > 0) { document.getElementById('marquee-wrapper').classList.remove('hidden'); document.getElementById('marquee-safe').classList.add('hidden'); document.getElementById('marquee-content').innerText = "NOT PACKED: " + unchecked.join(" · "); } 
+            else { document.getElementById('marquee-wrapper').classList.add('hidden'); document.getElementById('marquee-safe').classList.remove('hidden'); }
         }
 
         // --- MODALS & CRUD ---
@@ -711,7 +507,6 @@
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function openSettings() { document.getElementById('modal-settings').classList.remove('hidden'); }
         
-        // Trip
         function openAddTripModal(isEdit = false) {
             document.getElementById('modal-trip').classList.remove('hidden');
             const trip = isEdit ? getTrip() : null;
@@ -727,13 +522,15 @@
             const id = document.getElementById('trip-id').value; const title = document.getElementById('trip-name').value;
             if(!title) return alert('Name required');
             const loc = document.getElementById('trip-loc').value; const date = document.getElementById('trip-date').value;
-            const tz = detectTimezone(loc); // Auto set
+            const tz = detectTimezone(loc);
             
             if(id) {
                 const trip = trips.find(t => t.id === id); trip.title = title; trip.location = loc; trip.startDate = date; trip.timezone = tz;
                 if (tempDays > trip.days.length) for(let i=trip.days.length; i<tempDays; i++) trip.days.push({ items: [] });
             } else {
-                const newTrip = { id: genId(), title, location: loc, startDate: date, timezone: tz, days: Array(tempDays).fill().map(() => ({ items: [] })), shopping: [], packing: defaultPacking.map(p => ({ id: genId(), text: p, checked: false })) };
+                // FIXED: Correctly initialize empty days array
+                const newDays = Array.from({ length: tempDays }, () => ({ items: [] }));
+                const newTrip = { id: genId(), title, location: loc, startDate: date, timezone: tz, days: newDays, shopping: [], packing: defaultPacking.map(p => ({ id: genId(), text: p, checked: false })) };
                 trips.push(newTrip);
             }
             saveData(); document.getElementById('modal-trip').classList.add('hidden');
@@ -741,32 +538,19 @@
         }
         function deleteTrip(id) { if(confirm('Delete?')) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); } }
 
-        // Item
         function openItemModal(id = null) {
-            editingItemId = id;
-            document.getElementById('modal-item').classList.remove('hidden');
+            editingItemId = id; document.getElementById('modal-item').classList.remove('hidden');
             const trip = getTrip();
             document.getElementById('item-day').innerHTML = trip.days.map((_, i) => `<option value="${i}">Day ${i+1}</option>`).join('');
             document.getElementById('item-day').value = activeDayIndex;
-            
             if(id) {
                 const item = trip.days[activeDayIndex].items.find(i => i.id === id);
-                document.getElementById('item-time').value = item.time;
-                document.getElementById('item-title').value = item.title;
-                document.getElementById('item-loc').value = item.loc;
-                document.getElementById('item-cost').value = item.cost;
-                document.getElementById('item-currency').value = item.currency || 'TWD';
-                document.getElementById('item-note').value = item.note;
-                selectType(item.type || 'activity'); calcItemTWD();
+                document.getElementById('item-time').value = item.time; document.getElementById('item-title').value = item.title; document.getElementById('item-loc').value = item.loc; document.getElementById('item-cost').value = item.cost; document.getElementById('item-currency').value = item.currency || 'TWD'; document.getElementById('item-note').value = item.note; selectType(item.type || 'activity'); calcItemTWD();
             } else {
                 document.getElementById('item-time').value = '09:00'; document.getElementById('item-title').value = ''; document.getElementById('item-loc').value = ''; document.getElementById('item-cost').value = ''; document.getElementById('item-note').value = ''; selectType('activity'); calcItemTWD();
             }
         }
-        function selectType(t) {
-            document.getElementById('item-type').value = t;
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('border-muji-primary', 'text-muji-primary', 'bg-gray-100'));
-            document.getElementById(`type-${t}`).classList.add('border-muji-primary', 'text-muji-primary', 'bg-gray-100');
-        }
+        function selectType(t) { document.getElementById('item-type').value = t; document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('border-muji-primary', 'text-muji-primary', 'bg-gray-100')); document.getElementById(`type-${t}`).classList.add('border-muji-primary', 'text-muji-primary', 'bg-gray-100'); }
         function saveItem() {
             const dayIdx = parseInt(document.getElementById('item-day').value); const type = document.getElementById('item-type').value; const title = document.getElementById('item-title').value; const time = document.getElementById('item-time').value; const loc = document.getElementById('item-loc').value; const cost = document.getElementById('item-cost').value; const curr = document.getElementById('item-currency').value; const note = document.getElementById('item-note').value;
             if(!title) return alert('Title required');
@@ -779,26 +563,17 @@
         function modDays(d) { const trip = getTrip(); trip.days.push({items:[]}); saveData(); renderItinerary(); }
         function deleteCurrentDay() { const trip = getTrip(); if(trip.days.length>1 && confirm('Delete Day?')){ trip.days.splice(activeDayIndex,1); if(activeDayIndex>=trip.days.length) activeDayIndex=trip.days.length-1; saveData(); renderItinerary(); }}
 
-        // Shop
         function openShopModal(id=null) {
             editingShopId = id; document.getElementById('modal-shop').classList.remove('hidden');
             if(id) {
                 const trip = getTrip(); const item = trip.shopping.find(i => i.id === id);
-                document.getElementById('shop-name').value = item.name; document.getElementById('shop-price').value = item.price; document.getElementById('shop-curr').value = item.curr; document.getElementById('shop-loc').value = item.loc || '';
-                tempImg = item.img; if(tempImg) { document.getElementById('shop-img-preview').src = tempImg; document.getElementById('shop-img-preview').classList.remove('hidden'); document.getElementById('shop-img-placeholder').classList.add('hidden'); }
-            } else {
-                document.getElementById('shop-name').value = ''; document.getElementById('shop-price').value = ''; document.getElementById('shop-loc').value = ''; tempImg = null; document.getElementById('shop-img-preview').classList.add('hidden'); document.getElementById('shop-img-placeholder').classList.remove('hidden');
-            }
+                document.getElementById('shop-name').value = item.name; document.getElementById('shop-price').value = item.price; document.getElementById('shop-curr').value = item.curr; document.getElementById('shop-loc').value = item.loc || ''; tempImg = item.img; if(tempImg) { document.getElementById('shop-img-preview').src = tempImg; document.getElementById('shop-img-preview').classList.remove('hidden'); document.getElementById('shop-img-placeholder').classList.add('hidden'); }
+            } else { document.getElementById('shop-name').value = ''; document.getElementById('shop-price').value = ''; document.getElementById('shop-loc').value = ''; tempImg = null; document.getElementById('shop-img-preview').classList.add('hidden'); document.getElementById('shop-img-placeholder').classList.remove('hidden'); }
             calcShopTWD();
         }
         function handleImage(input) {
             if (input.files && input.files[0]) {
-                const reader = new FileReader(); reader.onload = function(e) {
-                    const img = new Image(); img.src = e.target.result; img.onload = function() {
-                        const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d'); let w=img.width, h=img.height; const max=600; if(w>h){if(w>max){h*=max/w;w=max}}else{if(h>max){w*=max/h;h=max}} cvs.width=w; cvs.height=h; ctx.drawImage(img,0,0,w,h); tempImg = cvs.toDataURL('image/jpeg',0.7);
-                        document.getElementById('shop-img-preview').src = tempImg; document.getElementById('shop-img-preview').classList.remove('hidden'); document.getElementById('shop-img-placeholder').classList.add('hidden');
-                    }
-                }; reader.readAsDataURL(input.files[0]);
+                const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.src = e.target.result; img.onload = function() { const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d'); let w=img.width, h=img.height; const max=600; if(w>h){if(w>max){h*=max/w;w=max}}else{if(h>max){w*=max/h;h=max}} cvs.width=w; cvs.height=h; ctx.drawImage(img,0,0,w,h); tempImg = cvs.toDataURL('image/jpeg',0.7); document.getElementById('shop-img-preview').src = tempImg; document.getElementById('shop-img-preview').classList.remove('hidden'); document.getElementById('shop-img-placeholder').classList.add('hidden'); }}; reader.readAsDataURL(input.files[0]);
             }
         }
         function saveShop() {
@@ -810,31 +585,20 @@
         }
         function deleteShopItem(id) { const trip = getTrip(); trip.shopping = trip.shopping.filter(i => i.id !== id); saveData(); renderShopping(); renderDetail(); }
 
-        // Pack
         function savePack() {
             const name = document.getElementById('pack-name').value; if(name) { const trip = getTrip(); trip.packing.push({ id: genId(), text: name, checked: false }); saveData(); renderPacking(); renderDetail(); document.getElementById('modal-pack').classList.add('hidden'); document.getElementById('pack-name').value = ''; }
         }
         function deletePackItem(id) { const trip = getTrip(); trip.packing = trip.packing.filter(i => i.id !== id); saveData(); renderPacking(); renderDetail(); }
 
-        // Export
         function exportAll() {
-            const trip = getTrip();
-            const c = document.getElementById('export-container');
+            const trip = getTrip(); const c = document.getElementById('export-container');
             c.innerHTML = `<h1 class="text-3xl font-bold text-gray-700 mb-4 font-serif">${trip.title}</h1>`;
-            trip.days.forEach((d,i) => {
-                c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Day ${i+1}</h3>`;
-                d.items.forEach(item => c.innerHTML += `<div class="pl-4 mb-1 border-b border-gray-50 pb-1"><b>${item.time}</b> ${item.title}</div>`);
-            });
-            c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Shopping</h3>`;
-            trip.shopping.forEach(s => c.innerHTML += `<div class="pl-4 mb-1">${s.name} - ${s.curr} ${s.price}</div>`);
+            trip.days.forEach((d,i) => { c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Day ${i+1}</h3>`; d.items.forEach(item => c.innerHTML += `<div class="pl-4 mb-1 border-b border-gray-50 pb-1"><b>${item.time}</b> ${item.title}</div>`); });
+            c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Shopping</h3>`; trip.shopping.forEach(s => c.innerHTML += `<div class="pl-4 mb-1">${s.name} - ${s.curr} ${s.price}</div>`);
             c.style.zIndex = 100; c.style.top = '0';
-            html2canvas(c).then(canvas => {
-                const link = document.createElement('a'); link.download = 'TravelFlow_Plan.jpg'; link.href = canvas.toDataURL(); link.click();
-                c.style.top = '-9999px'; c.style.zIndex = -5;
-            });
+            html2canvas(c).then(canvas => { const link = document.createElement('a'); link.download = 'TravelFlow_Plan.jpg'; link.href = canvas.toDataURL(); link.click(); c.style.top = '-9999px'; c.style.zIndex = -5; });
         }
 
-        // Swipe
         let tStartX=0, tCurrX=0, isSwiping=false;
         function ts(e) { tStartX = e.touches[0].clientX; e.currentTarget.style.transition = 'none'; }
         function tm(e, el) { tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX; if(diff > 0 && diff < 150) { e.preventDefault(); el.style.transform = `translateX(${diff}px)`; } }
@@ -844,13 +608,12 @@
                 if(confirm('Delete?')) {
                     el.style.transform = `translateX(100%)`;
                     setTimeout(() => {
-                        if(type==='item') deleteItem(id);
-                        if(type==='shop') deleteShopItem(id);
-                        if(type==='pack') deletePackItem(id);
+                        if(type==='item') deleteItem(id); if(type==='shop') deleteShopItem(id); if(type==='pack') deletePackItem(id);
                     }, 200);
                 } else el.style.transform = 'translateX(0)';
             } else el.style.transform = 'translateX(0)';
         }
+        function renderHome(){const container=document.getElementById('trip-list-container');container.innerHTML='';if(trips.length===0){container.innerHTML=`<div class="text-center mt-20 text-gray-400 opacity-60"><i data-lucide="cloud" class="w-16 h-16 mx-auto mb-2"></i><p>尚無旅行計畫</p></div>`;return}trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='swipe-item';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-4 muji-card flex justify-between items-center" onclick="openTrip('${trip.id}')" ontouchstart="ts(event)" ontouchmove="tm(event,this)" ontouchend="te(event,this,'${trip.id}','trip')"><div><h3 class="font-serif font-bold text-lg text-muji-text">${trip.title}</h3><p class="text-xs text-muji-secondary mt-1">${dayCount} Days · NT$ ${totalCost.toLocaleString()}</p></div><i data-lucide="chevron-right" class="text-muji-border w-5 h-5"></i></div>`;container.appendChild(el)});lucide.createIcons()}
     </script>
 </body>
 </html>

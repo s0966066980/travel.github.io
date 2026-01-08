@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 6.0</title>
+    <title>TravelFlow 6.3</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -57,8 +57,6 @@
         .scroll-area { flex: 1; overflow-y: auto; padding: 1.2rem; padding-bottom: 100px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .muji-card { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-        
         .swipe-item { position: relative; overflow: hidden; touch-action: pan-y; margin-bottom: 12px; transition: transform 0.2s; border-radius: 4px; }
         .swipe-content { position: relative; z-index: 10; background: white; transition: transform 0.15s ease-out; border: 1px solid #E0E0E0; border-radius: 4px; }
         .swipe-bg { position: absolute; inset: 0; background: #A33A3A; display: flex; align-items: center; justify-content: flex-end; padding-right: 1.5rem; color: white; z-index: 1; border-radius: 4px; }
@@ -78,6 +76,16 @@
         .muji-input { width: 100%; padding: 10px; background: #F8F8F8; border: 1px solid #E0E0E0; border-radius: 4px; outline: none; font-size: 14px; transition: border-color 0.2s; }
         .muji-input:focus { border-color: #888; background: #FFF; }
         #export-container { position: fixed; top: -9999px; left: 0; width: 600px; background: #F4F4F0; z-index: -5; font-family: 'Noto Sans TC'; }
+        
+        .muji-card { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        
+        /* Type Selector */
+        .type-btn {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; transition: all 0.2s;
+        }
+        .type-btn.selected { background-color: #EFEFEA; border-color: #505050; color: #333; }
+        .type-btn i { width: 20px; height: 20px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -88,11 +96,13 @@
             <header class="p-6 pb-2 flex justify-between items-center shrink-0 border-b border-muji-border bg-muji-bg">
                 <div>
                     <h1 class="text-2xl font-serif font-bold text-muji-text tracking-widest">TravelFlow</h1>
-                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.0</p>
+                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.3</p>
                 </div>
                 <button onclick="openSettings()" class="p-2 text-muji-secondary hover:text-muji-text transition"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i></button>
             </header>
+            
             <div id="trip-list" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+            
             <div class="p-5 shrink-0 pb-safe">
                 <button onclick="openAddTripModal()" class="w-full bg-muji-primary text-white py-4 rounded shadow-sm hover:bg-gray-700 transition flex items-center justify-center gap-2 text-sm tracking-widest"><i data-lucide="plus" class="w-4 h-4"></i> 新增旅行</button>
             </div>
@@ -160,15 +170,15 @@
         </div>
     </div>
 
-    <!-- EXPORT CONTAINER -->
     <div id="export-container"></div>
 
     <!-- MODALS -->
+    
     <!-- Trip Modal -->
     <div id="modal-trip" class="modal-overlay hidden">
         <div class="modal-box p-6 relative">
             <button onclick="closeModal('modal-trip')" class="absolute top-4 right-4 text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <h3 class="text-lg font-bold mb-6 text-center tracking-widest text-muji-text">TRAVEL PLAN</h3>
+            <h3 class="text-lg font-bold mb-6 text-center tracking-widest text-muji-text" id="trip-modal-title">TRAVEL PLAN</h3>
             <input type="hidden" id="trip-id">
             <div class="space-y-4 overflow-y-auto">
                 <div><label class="text-xs text-muji-secondary block mb-1">名稱 NAME</label><input type="text" id="trip-name" class="muji-input"></div>
@@ -276,9 +286,8 @@
     </div>
 
     <script>
-        // --- DATA & CONFIG ---
-        let trips = JSON.parse(localStorage.getItem('tf6_trips')) || [];
-        let config = JSON.parse(localStorage.getItem('tf6_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 } };
+        let trips = JSON.parse(localStorage.getItem('tf6_3_trips')) || [];
+        let config = JSON.parse(localStorage.getItem('tf6_3_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 } };
         let defaultPacking = ["護照", "身分證", "現金", "信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "雨傘/雨衣", "面紙/濕紙巾"];
         
         let currentTripId = null;
@@ -296,21 +305,60 @@
             renderHome();
             loadSettings();
             fetchRates();
+            updateClocks();
+            clockInterval = setInterval(updateClocks, 1000);
             document.addEventListener('touchstart', handleTouchStart, false);
             document.addEventListener('touchmove', handleTouchMove, false);
             document.addEventListener('touchend', handleTouchEnd, false);
-            updateClocks();
-            clockInterval = setInterval(updateClocks, 1000);
         });
 
-        function saveData() { localStorage.setItem('tf6_trips', JSON.stringify(trips)); }
+        // Swipe
+        let tStartX=0, tCurrX=0, isSwiping=false;
+        function handleTouchStart(e) { tStartX = e.touches[0].clientX; } // Do not clear transition here, do it on move
+        function handleTouchMove(e) {
+            tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX;
+            if(diff > 0 && diff < 150) { 
+                e.preventDefault(); 
+                // Find closest swipe-item parent
+                const el = e.target.closest('.swipe-content');
+                if(el) { el.style.transition = 'none'; el.style.transform = `translateX(${diff}px)`; }
+            }
+        }
+        function handleTouchEnd(e) {
+             const diff = tCurrX - tStartX;
+             const el = e.target.closest('.swipe-content');
+             if(!el) return;
+             
+             el.style.transition = 'transform 0.2s';
+             // Need ID and Type. We can store them in data attributes or pass via closure, 
+             // but global listener is tricky. 
+             // Let's use the inline handlers defined in HTML: ts, tm, te
+        }
+        
+        // Re-implementing ts, tm, te specifically for inline calls
+        function ts(e) { tStartX = e.touches[0].clientX; e.currentTarget.style.transition = 'none'; }
+        function tm(e, el) { tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX; if(diff > 0 && diff < 150) { e.preventDefault(); el.style.transform = `translateX(${diff}px)`; } }
+        function te(e, el, id, type) {
+            el.style.transition = 'transform 0.2s';
+            if(tCurrX - tStartX > 80) {
+                if(confirm('Delete?')) {
+                    el.style.transform = `translateX(100%)`;
+                    setTimeout(() => {
+                        if(type==='item') deleteItem(id); if(type==='shop') deleteShopItem(id); if(type==='pack') deletePackItem(id);
+                    }, 200);
+                } else el.style.transform = 'translateX(0)';
+            } else el.style.transform = 'translateX(0)';
+        }
+
+        // Functions
+        function saveData() { localStorage.setItem('tf6_3_trips', JSON.stringify(trips)); }
         function saveConfig() { 
             config.rates.JPY = parseFloat(document.getElementById('rate-JPY').value);
             config.rates.USD = parseFloat(document.getElementById('rate-USD').value);
             config.rates.KRW = parseFloat(document.getElementById('rate-KRW').value);
             config.rates.EUR = parseFloat(document.getElementById('rate-EUR').value);
             config.rates.HKD = parseFloat(document.getElementById('rate-HKD').value);
-            localStorage.setItem('tf6_config', JSON.stringify(config)); 
+            localStorage.setItem('tf6_3_config', JSON.stringify(config)); 
         }
         function loadSettings() {
             document.getElementById('rate-JPY').value = config.rates.JPY;
@@ -322,10 +370,9 @@
         function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
         function getTrip() { return trips.find(t => t.id === currentTripId); }
 
-        // --- TIMEZONE ---
         function detectTimezone(location) {
             const loc = location.toLowerCase();
-            if (loc.includes('tokyo') || loc.includes('osaka') || loc.includes('japan') || loc.includes('kyoto')) return 'Asia/Tokyo';
+            if (loc.includes('tokyo') || loc.includes('osaka') || loc.includes('japan')) return 'Asia/Tokyo';
             if (loc.includes('seoul') || loc.includes('korea')) return 'Asia/Seoul';
             if (loc.includes('bangkok') || loc.includes('thailand')) return 'Asia/Bangkok';
             if (loc.includes('london') || loc.includes('uk')) return 'Europe/London';
@@ -334,16 +381,13 @@
             return 'Asia/Taipei';
         }
 
-        // --- CLOCKS ---
         function updateClocks() {
             const now = new Date();
-            const tw = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('clock-tw').innerText = tw;
+            document.getElementById('clock-tw').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const trip = getTrip();
             if(trip) {
                 const tz = trip.timezone || 'Asia/Taipei';
-                const loc = now.toLocaleTimeString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                document.getElementById('clock-loc').innerText = loc;
+                document.getElementById('clock-loc').innerText = now.toLocaleTimeString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 updateActiveItems(tz);
             }
         }
@@ -360,34 +404,31 @@
                     const [h, m] = timeStr.split(':').map(Number);
                     const itemMins = h * 60 + m;
                     el.querySelector('.swipe-content').classList.remove('item-active', 'item-past');
-                    if (currentMins >= itemMins + 90) { el.querySelector('.swipe-content').classList.add('item-past'); } 
-                    else if (currentMins >= itemMins && currentMins < itemMins + 90) { el.querySelector('.swipe-content').classList.add('item-active'); }
+                    if (currentMins >= itemMins + 90) el.querySelector('.swipe-content').classList.add('item-past');
+                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.querySelector('.swipe-content').classList.add('item-active');
                 }
             });
         }
 
-        // --- RATES (Open Exchange Rates - Free Endpoint) ---
+        function updateCostDisplay() {
+            if(!currentTripId) return;
+            const trip = getTrip();
+            if(!trip) return;
+            const total = calculateTotalCost(trip);
+            const el = document.getElementById('detail-cost');
+            if(el) el.innerText = `TOTAL: NT$ ${total.toLocaleString()}`;
+        }
+
         async function fetchRates() {
             const btn = document.getElementById('btn-update-rates');
-            if(btn) btn.innerHTML = '<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> Updating...';
-            lucide.createIcons();
-            
+            if(btn) btn.innerHTML = '<i data-lucide="loader" class="w-3 h-3 inline animate-spin"></i> Updating...'; lucide.createIcons();
             try { 
-                const res = await fetch('https://open.er-api.com/v6/latest/TWD'); 
-                const data = await res.json();
+                const res = await fetch('https://open.er-api.com/v6/latest/TWD'); const data = await res.json();
                 if(data && data.rates) {
-                    config.rates.JPY = 1 / data.rates.JPY; 
-                    config.rates.USD = 1 / data.rates.USD;
-                    config.rates.KRW = 1 / data.rates.KRW; 
-                    config.rates.EUR = 1 / data.rates.EUR; 
-                    config.rates.HKD = 1 / data.rates.HKD;
-                    saveConfig(); loadSettings(); updateCostDisplay();
-                    if(btn) btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Updated';
+                    config.rates.JPY = 1 / data.rates.JPY; config.rates.USD = 1 / data.rates.USD; config.rates.KRW = 1 / data.rates.KRW; config.rates.EUR = 1 / data.rates.EUR; config.rates.HKD = 1 / data.rates.HKD;
+                    saveConfig(); loadSettings(); updateCostDisplay(); if(btn) btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Updated';
                 }
-            } catch(e) { 
-                console.error(e);
-                if(btn) btn.innerHTML = '<i data-lucide="x" class="w-3 h-3 inline"></i> Failed';
-            }
+            } catch(e) { if(btn) btn.innerHTML = '<i data-lucide="x" class="w-3 h-3 inline"></i> Failed'; }
             setTimeout(() => { if(btn) { btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> Update Rates'; lucide.createIcons(); } }, 2000);
         }
         function convertToTWD(amount, currency) { if(!amount) return 0; const rate = config.rates[currency] || 1; return currency === 'TWD' ? Math.round(amount) : Math.round(amount * rate); }
@@ -400,7 +441,6 @@
             return total;
         }
 
-        // --- NAV ---
         function openTrip(id) {
             currentTripId = id;
             document.getElementById('view-home').classList.add('-translate-x-full');
@@ -411,9 +451,7 @@
         function renderDetail() {
             const trip = getTrip(); if(!trip) return;
             document.getElementById('detail-title').innerText = trip.title;
-            const total = calculateTotalCost(trip);
-            document.getElementById('detail-cost').innerText = `TOTAL: NT$ ${total.toLocaleString()}`;
-            updateMarquee();
+            updateCostDisplay(); updateMarquee();
             if(activeTab==='itinerary') renderItinerary();
             if(activeTab==='shopping') renderShopping();
             if(activeTab==='packing') renderPacking();
@@ -428,7 +466,6 @@
             renderDetail();
         }
 
-        // --- ITINERARY ---
         function renderItinerary() {
             const trip = getTrip(); const dayContainer = document.getElementById('day-selector'); const listContainer = document.getElementById('itinerary-list');
             let daysHtml = '';
@@ -446,14 +483,7 @@
                     let icon='map-pin';
                     if(item.type==='flight') icon='plane'; if(item.type==='transport') icon='bus'; if(item.type==='food') icon='utensils';
                     if(item.type==='activity') icon='ticket'; if(item.type==='shopping') icon='shopping-bag'; if(item.type==='stay') icon='bed';
-                    el.innerHTML = `
-                        <div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div>
-                        <div class="swipe-content p-4 shadow-sm" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'item')" onclick="openItemModal('${item.id}')">
-                            <div class="flex gap-3">
-                                <div class="flex flex-col items-center gap-1 w-10 shrink-0 pt-1"><span class="font-mono text-sm font-bold text-muji-text">${item.time}</span><i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i></div>
-                                <div class="flex-1 min-w-0 border-l border-muji-border pl-3"><h4 class="font-bold text-muji-text truncate">${item.title}</h4>${item.loc ? `<div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.loc}</div>` : ''}${item.cost ? `<div class="text-xs text-muji-secondary mt-1 font-mono">${item.currency} ${item.cost}</div>` : ''}${item.note ? `<p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded">${item.note}</p>` : ''}</div>
-                            </div>
-                        </div>`;
+                    el.innerHTML = `<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-4 shadow-sm" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'item')" onclick="openItemModal('${item.id}')"><div class="flex gap-3"><div class="flex flex-col items-center gap-1 w-10 shrink-0 pt-1"><span class="font-mono text-sm font-bold text-muji-text">${item.time}</span><i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i></div><div class="flex-1 min-w-0 border-l border-muji-border pl-3"><h4 class="font-bold text-muji-text truncate">${item.title}</h4>${item.loc ? `<div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.loc}</div>` : ''}${item.cost ? `<div class="text-xs text-muji-secondary mt-1 font-mono">${item.currency} ${item.cost}</div>` : ''}${item.note ? `<p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded">${item.note}</p>` : ''}</div></div></div>`;
                     listContainer.appendChild(el);
                 });
             }
@@ -461,6 +491,10 @@
         }
 
         // --- SHOPPING ---
+        function setGalleryMode(enable) {
+            galleryMode = enable;
+            renderShopping();
+        }
         function renderShopping() {
             const trip = getTrip(); const list = document.getElementById('shopping-list'); list.innerHTML = '';
             if (trip.shopping.length === 0) { list.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-300"><i data-lucide="shopping-bag" class="w-10 h-10 mb-2 opacity-50"></i><p class="text-xs">No Purchases</p></div>`; } 
@@ -485,7 +519,6 @@
         }
         function toggleGalleryMode() { galleryMode = !galleryMode; renderShopping(); }
 
-        // --- PACKING ---
         function renderPacking() {
             const trip = getTrip(); const list = document.getElementById('packing-list'); list.innerHTML = '';
             trip.packing.forEach(item => {
@@ -518,6 +551,7 @@
             document.getElementById('trip-days').innerText = tempDays;
         }
         function changeTripDays(d) { tempDays += d; if (tempDays < 1) tempDays = 1; document.getElementById('trip-days').innerText = tempDays; }
+        
         function saveTrip() {
             const id = document.getElementById('trip-id').value; const title = document.getElementById('trip-name').value;
             if(!title) return alert('Name required');
@@ -528,7 +562,6 @@
                 const trip = trips.find(t => t.id === id); trip.title = title; trip.location = loc; trip.startDate = date; trip.timezone = tz;
                 if (tempDays > trip.days.length) for(let i=trip.days.length; i<tempDays; i++) trip.days.push({ items: [] });
             } else {
-                // FIXED: Correctly initialize empty days array
                 const newDays = Array.from({ length: tempDays }, () => ({ items: [] }));
                 const newTrip = { id: genId(), title, location: loc, startDate: date, timezone: tz, days: newDays, shopping: [], packing: defaultPacking.map(p => ({ id: genId(), text: p, checked: false })) };
                 trips.push(newTrip);
@@ -599,22 +632,13 @@
             html2canvas(c).then(canvas => { const link = document.createElement('a'); link.download = 'TravelFlow_Plan.jpg'; link.href = canvas.toDataURL(); link.click(); c.style.top = '-9999px'; c.style.zIndex = -5; });
         }
 
-        let tStartX=0, tCurrX=0, isSwiping=false;
-        function ts(e) { tStartX = e.touches[0].clientX; e.currentTarget.style.transition = 'none'; }
-        function tm(e, el) { tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX; if(diff > 0 && diff < 150) { e.preventDefault(); el.style.transform = `translateX(${diff}px)`; } }
-        function te(e, el, id, type) {
-            el.style.transition = 'transform 0.2s';
-            if(tCurrX - tStartX > 80) {
-                if(confirm('Delete?')) {
-                    el.style.transform = `translateX(100%)`;
-                    setTimeout(() => {
-                        if(type==='item') deleteItem(id); if(type==='shop') deleteShopItem(id); if(type==='pack') deletePackItem(id);
-                    }, 200);
-                } else el.style.transform = 'translateX(0)';
-            } else el.style.transform = 'translateX(0)';
+        function renderHome(){
+            const container=document.getElementById('trip-list');
+            if(!container) return;
+            container.innerHTML='';
+            if(trips.length===0){container.innerHTML=`<div class="text-center mt-20 text-gray-400 opacity-60"><i data-lucide="cloud" class="w-16 h-16 mx-auto mb-2"></i><p>尚無旅行計畫</p></div>`;return}
+            trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='swipe-item';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-4 muji-card flex justify-between items-center" onclick="openTrip('${trip.id}')" ontouchstart="ts(event)" ontouchmove="tm(event,this)" ontouchend="te(event,this,'${trip.id}','trip')"><div><h3 class="font-serif font-bold text-lg text-muji-text">${trip.title}</h3><p class="text-xs text-muji-secondary mt-1">${dayCount} Days · NT$ ${totalCost.toLocaleString()}</p></div><i data-lucide="chevron-right" class="text-muji-border w-5 h-5"></i></div>`;container.appendChild(el)});lucide.createIcons()
         }
-        function renderHome(){const container=document.getElementById('trip-list-container');container.innerHTML='';if(trips.length===0){container.innerHTML=`<div class="text-center mt-20 text-gray-400 opacity-60"><i data-lucide="cloud" class="w-16 h-16 mx-auto mb-2"></i><p>尚無旅行計畫</p></div>`;return}trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='swipe-item';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-4 muji-card flex justify-between items-center" onclick="openTrip('${trip.id}')" ontouchstart="ts(event)" ontouchmove="tm(event,this)" ontouchend="te(event,this,'${trip.id}','trip')"><div><h3 class="font-serif font-bold text-lg text-muji-text">${trip.title}</h3><p class="text-xs text-muji-secondary mt-1">${dayCount} Days · NT$ ${totalCost.toLocaleString()}</p></div><i data-lucide="chevron-right" class="text-muji-border w-5 h-5"></i></div>`;container.appendChild(el)});lucide.createIcons()}
     </script>
 </body>
 </html>
-

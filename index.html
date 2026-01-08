@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 6.5</title>
+    <title>TravelFlow 6.6</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -102,7 +102,7 @@
             <header class="p-6 pb-2 flex justify-between items-center shrink-0 border-b border-muji-border bg-muji-bg">
                 <div>
                     <h1 class="text-2xl font-serif font-bold text-muji-text tracking-widest">TravelFlow</h1>
-                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.5</p>
+                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.6</p>
                 </div>
                 <button onclick="openSettings()" class="p-2 text-muji-secondary hover:text-muji-text transition"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i></button>
             </header>
@@ -295,8 +295,8 @@
     </div>
 
     <script>
-        let trips = JSON.parse(localStorage.getItem('tf6_5_trips')) || [];
-        let config = JSON.parse(localStorage.getItem('tf6_5_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 }, lastUpdate: '' };
+        let trips = JSON.parse(localStorage.getItem('tf6_6_trips')) || [];
+        let config = JSON.parse(localStorage.getItem('tf6_6_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 }, lastUpdate: '' };
         let defaultPacking = ["護照", "身分證", "現金", "信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "雨傘/雨衣", "面紙/濕紙巾"];
         
         let currentTripId = null;
@@ -316,17 +316,20 @@
             fetchRates(); // Auto fetch on load
             updateClocks();
             clockInterval = setInterval(updateClocks, 1000);
+            document.addEventListener('touchstart', handleTouchStart, false);
+            document.addEventListener('touchmove', handleTouchMove, false);
+            document.addEventListener('touchend', handleTouchEnd, false);
         });
 
         // Functions
-        function saveData() { localStorage.setItem('tf6_5_trips', JSON.stringify(trips)); }
+        function saveData() { localStorage.setItem('tf6_6_trips', JSON.stringify(trips)); }
         function saveConfig() { 
             config.rates.JPY = parseFloat(document.getElementById('rate-JPY').value);
             config.rates.USD = parseFloat(document.getElementById('rate-USD').value);
             config.rates.KRW = parseFloat(document.getElementById('rate-KRW').value);
             config.rates.EUR = parseFloat(document.getElementById('rate-EUR').value);
             config.rates.HKD = parseFloat(document.getElementById('rate-HKD').value);
-            localStorage.setItem('tf6_5_config', JSON.stringify(config)); 
+            localStorage.setItem('tf6_6_config', JSON.stringify(config)); 
         }
         function loadSettings() {
             document.getElementById('rate-JPY').value = config.rates.JPY;
@@ -366,15 +369,15 @@
             const nowString = new Date().toLocaleString('en-US', { timeZone: tz });
             const locDate = new Date(nowString);
             const currentMins = locDate.getHours() * 60 + locDate.getMinutes();
-            const items = document.querySelectorAll('.muji-card[data-time]');
+            const items = document.querySelectorAll('.swipe-item');
             items.forEach(el => {
                 const timeStr = el.getAttribute('data-time');
                 if(timeStr) {
                     const [h, m] = timeStr.split(':').map(Number);
                     const itemMins = h * 60 + m;
-                    el.classList.remove('item-active', 'item-past');
-                    if (currentMins >= itemMins + 90) el.classList.add('item-past');
-                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.classList.add('item-active');
+                    el.querySelector('.swipe-content').classList.remove('item-active', 'item-past');
+                    if (currentMins >= itemMins + 90) el.querySelector('.swipe-content').classList.add('item-past');
+                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.querySelector('.swipe-content').classList.add('item-active');
                 }
             });
         }
@@ -394,11 +397,28 @@
             try { 
                 const res = await fetch('https://open.er-api.com/v6/latest/TWD'); const data = await res.json();
                 if(data && data.rates) {
-                    config.rates.JPY = 1 / data.rates.JPY; config.rates.USD = 1 / data.rates.USD; config.rates.KRW = 1 / data.rates.KRW; config.rates.EUR = 1 / data.rates.EUR; config.rates.HKD = 1 / data.rates.HKD;
-                    const d = new Date(); config.lastUpdate = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
-                    saveConfig(); loadSettings(); updateCostDisplay(); if(btn) btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Updated';
+                    // Correct Fix: Update Config Object -> Save to LocalStorage -> Update UI
+                    config.rates.JPY = 1 / data.rates.JPY; 
+                    config.rates.USD = 1 / data.rates.USD; 
+                    config.rates.KRW = 1 / data.rates.KRW; 
+                    config.rates.EUR = 1 / data.rates.EUR; 
+                    config.rates.HKD = 1 / data.rates.HKD;
+                    const d = new Date(); 
+                    config.lastUpdate = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+                    
+                    // SAVE DIRECTLY TO STORAGE (BYPASS READ FROM INPUTS)
+                    localStorage.setItem('tf6_6_config', JSON.stringify(config));
+                    
+                    // THEN UPDATE UI
+                    loadSettings(); 
+                    updateCostDisplay(); 
+                    
+                    if(btn) btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Updated';
                 }
-            } catch(e) { if(btn) btn.innerHTML = '<i data-lucide="x" class="w-3 h-3 inline"></i> Failed'; }
+            } catch(e) { 
+                console.error(e);
+                if(btn) btn.innerHTML = '<i data-lucide="x" class="w-3 h-3 inline"></i> Failed'; 
+            }
             setTimeout(() => { if(btn) { btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> Update Rates'; lucide.createIcons(); } }, 2000);
         }
         function convertToTWD(amount, currency) { if(!amount) return 0; const rate = config.rates[currency] || 1; return currency === 'TWD' ? Math.round(amount) : Math.round(amount * rate); }
@@ -630,6 +650,25 @@
             html2canvas(c).then(canvas => { const link = document.createElement('a'); link.download = 'TravelFlow_Plan.jpg'; link.href = canvas.toDataURL(); link.click(); c.style.top = '-9999px'; c.style.zIndex = -5; });
         }
 
+        // Swipe (Removed, keeping clean handlers)
+        let tStartX=0, tCurrX=0, isSwiping=false;
+        function handleTouchStart(e) { tStartX = e.touches[0].clientX; } 
+        function handleTouchMove(e) {
+            tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX;
+            if(diff > 0 && diff < 150) { 
+                e.preventDefault(); 
+                const el = e.target.closest('.swipe-content');
+                if(el) { el.style.transition = 'none'; el.style.transform = `translateX(${diff}px)`; }
+            }
+        }
+        function handleTouchEnd(e) {
+             const diff = tCurrX - tStartX;
+             const el = e.target.closest('.swipe-content');
+             if(!el) return;
+             el.style.transition = 'transform 0.2s';
+             el.style.transform = 'translateX(0)';
+        }
+        
         function renderHome(){
             const container=document.getElementById('trip-list');
             if(!container) return;

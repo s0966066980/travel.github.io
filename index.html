@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TravelFlow 6.3</title>
+    <title>TravelFlow 6.5</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -41,6 +41,7 @@
         :root { --safe-bottom: env(safe-area-inset-bottom, 20px); }
         body { background-color: #F4F4F0; color: #444444; overscroll-behavior-y: none; -webkit-user-select: none; user-select: none; position: fixed; width: 100%; height: 100%; overflow: hidden; }
         
+        /* Layout */
         .app-layout { display: flex; height: 100%; width: 100%; overflow: hidden; }
         .sidebar { width: 68px; background: #EFEFEA; border-right: 1px solid #E0E0E0; display: flex; flex-direction: column; align-items: center; padding-top: 1.5rem; z-index: 20; flex-shrink: 0; }
         .nav-btn { width: 44px; height: 44px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; margin-bottom: 1.2rem; transition: all 0.3s ease; border: 1px solid transparent; }
@@ -49,6 +50,8 @@
         .nav-btn span { font-size: 9px; margin-top: 2px; font-weight: 500; }
         
         .main-content { flex: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; background: #F4F4F0; }
+        
+        /* Marquee */
         .marquee-container { background-color: #EAEAEA; color: #7F0019; overflow: hidden; white-space: nowrap; padding: 8px 0; border-bottom: 1px solid #D0D0D0; flex-shrink: 0; height: 36px; display: flex; align-items: center; }
         .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 15s linear infinite; font-size: 12px; font-family: 'Noto Serif TC'; }
         .marquee-safe { background-color: #E6EAE6; color: #4A6E4A; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 12px; border-bottom: 1px solid #C0C0C0; }
@@ -57,35 +60,38 @@
         .scroll-area { flex: 1; overflow-y: auto; padding: 1.2rem; padding-bottom: 100px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .swipe-item { position: relative; overflow: hidden; touch-action: pan-y; margin-bottom: 12px; transition: transform 0.2s; border-radius: 4px; }
-        .swipe-content { position: relative; z-index: 10; background: white; transition: transform 0.15s ease-out; border: 1px solid #E0E0E0; border-radius: 4px; }
-        .swipe-bg { position: absolute; inset: 0; background: #A33A3A; display: flex; align-items: center; justify-content: flex-end; padding-right: 1.5rem; color: white; z-index: 1; border-radius: 4px; }
+        /* Cards */
+        .muji-card { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
         
+        /* Timeline */
         .timeline-line { position: absolute; left: 19px; top: 20px; bottom: 0; width: 1px; background: none; border-left: 1px dashed #C0C0C0; z-index: 0; }
         .item-past { opacity: 0.5; filter: grayscale(1); }
         .item-active { border-left: 4px solid #7F7F7F !important; background: #FAFAFA !important; }
         
+        /* Gallery */
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .gallery-item { aspect-ratio: 1; border-radius: 4px; overflow: hidden; position: relative; border: 1px solid #E0E0E0; }
         .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); padding: 8px; color: #333; border-top: 1px solid #E0E0E0; }
         
+        /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(244,244,240,0.8); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal-box { width: 90%; max-width: 400px; background: #FFFFFF; border-radius: 8px; border: 1px solid #C0C0C0; box-shadow: 0 10px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; max-height: 85vh; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         
         .muji-input { width: 100%; padding: 10px; background: #F8F8F8; border: 1px solid #E0E0E0; border-radius: 4px; outline: none; font-size: 14px; transition: border-color 0.2s; }
         .muji-input:focus { border-color: #888; background: #FFF; }
-        #export-container { position: fixed; top: -9999px; left: 0; width: 600px; background: #F4F4F0; z-index: -5; font-family: 'Noto Sans TC'; }
-        
-        .muji-card { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
         
         /* Type Selector */
-        .type-btn {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; transition: all 0.2s;
-        }
+        .type-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; transition: all 0.2s; }
         .type-btn.selected { background-color: #EFEFEA; border-color: #505050; color: #333; }
         .type-btn i { width: 20px; height: 20px; margin-bottom: 4px; }
+
+        #export-container { position: fixed; top: -9999px; left: 0; width: 600px; background: #F4F4F0; z-index: -5; font-family: 'Noto Sans TC'; }
+        
+        /* Helper for layout */
+        .item-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+        .delete-btn { padding: 8px; color: #ccc; border-radius: 4px; flex-shrink: 0; }
+        .delete-btn:hover { color: #7F0019; background-color: #fcebeb; }
     </style>
 </head>
 <body>
@@ -96,7 +102,7 @@
             <header class="p-6 pb-2 flex justify-between items-center shrink-0 border-b border-muji-border bg-muji-bg">
                 <div>
                     <h1 class="text-2xl font-serif font-bold text-muji-text tracking-widest">TravelFlow</h1>
-                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.3</p>
+                    <p class="text-xs text-muji-secondary tracking-widest mt-1">SIMPLICITY 6.5</p>
                 </div>
                 <button onclick="openSettings()" class="p-2 text-muji-secondary hover:text-muji-text transition"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i></button>
             </header>
@@ -273,7 +279,10 @@
             <button onclick="closeModal('modal-settings')" class="absolute top-4 right-4 text-muji-secondary"><i data-lucide="x" class="w-5 h-5"></i></button>
             <h3 class="text-xl font-bold mb-4 text-muji-text">Rates</h3>
             <div class="mb-4">
-                <button id="btn-update-rates" onclick="fetchRates()" class="text-xs bg-gray-100 text-muji-text px-3 py-2 rounded mb-4 w-full border border-muji-border hover:bg-white"><i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> Update Rates</button>
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-xs text-muji-secondary">自動更新匯率 (Last Update: <span id="last-update">--</span>)</p>
+                    <button id="btn-update-rates" onclick="fetchRates()" class="text-xs bg-gray-100 text-muji-text px-3 py-2 rounded border border-muji-border hover:bg-white"><i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> 更新</button>
+                </div>
                 <div class="grid grid-cols-2 gap-3 text-sm">
                     <div class="flex justify-between bg-gray-50 p-2 rounded border border-muji-border"><span class="font-bold">JPY</span><input id="rate-JPY" type="number" class="w-16 bg-transparent text-right outline-none" onchange="saveConfig()"></div>
                     <div class="flex justify-between bg-gray-50 p-2 rounded border border-muji-border"><span class="font-bold">USD</span><input id="rate-USD" type="number" class="w-16 bg-transparent text-right outline-none" onchange="saveConfig()"></div>
@@ -286,8 +295,8 @@
     </div>
 
     <script>
-        let trips = JSON.parse(localStorage.getItem('tf6_3_trips')) || [];
-        let config = JSON.parse(localStorage.getItem('tf6_3_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 } };
+        let trips = JSON.parse(localStorage.getItem('tf6_5_trips')) || [];
+        let config = JSON.parse(localStorage.getItem('tf6_5_config')) || { rates: { JPY: 0.22, USD: 31.5, KRW: 0.024, EUR: 34.0, HKD: 4.0 }, lastUpdate: '' };
         let defaultPacking = ["護照", "身分證", "現金", "信用卡", "手機充電器", "萬用轉接頭", "行動電源", "換洗衣物", "盥洗用品", "個人藥品", "雨傘/雨衣", "面紙/濕紙巾"];
         
         let currentTripId = null;
@@ -304,61 +313,20 @@
             lucide.createIcons();
             renderHome();
             loadSettings();
-            fetchRates();
+            fetchRates(); // Auto fetch on load
             updateClocks();
             clockInterval = setInterval(updateClocks, 1000);
-            document.addEventListener('touchstart', handleTouchStart, false);
-            document.addEventListener('touchmove', handleTouchMove, false);
-            document.addEventListener('touchend', handleTouchEnd, false);
         });
 
-        // Swipe
-        let tStartX=0, tCurrX=0, isSwiping=false;
-        function handleTouchStart(e) { tStartX = e.touches[0].clientX; } // Do not clear transition here, do it on move
-        function handleTouchMove(e) {
-            tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX;
-            if(diff > 0 && diff < 150) { 
-                e.preventDefault(); 
-                // Find closest swipe-item parent
-                const el = e.target.closest('.swipe-content');
-                if(el) { el.style.transition = 'none'; el.style.transform = `translateX(${diff}px)`; }
-            }
-        }
-        function handleTouchEnd(e) {
-             const diff = tCurrX - tStartX;
-             const el = e.target.closest('.swipe-content');
-             if(!el) return;
-             
-             el.style.transition = 'transform 0.2s';
-             // Need ID and Type. We can store them in data attributes or pass via closure, 
-             // but global listener is tricky. 
-             // Let's use the inline handlers defined in HTML: ts, tm, te
-        }
-        
-        // Re-implementing ts, tm, te specifically for inline calls
-        function ts(e) { tStartX = e.touches[0].clientX; e.currentTarget.style.transition = 'none'; }
-        function tm(e, el) { tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX; if(diff > 0 && diff < 150) { e.preventDefault(); el.style.transform = `translateX(${diff}px)`; } }
-        function te(e, el, id, type) {
-            el.style.transition = 'transform 0.2s';
-            if(tCurrX - tStartX > 80) {
-                if(confirm('Delete?')) {
-                    el.style.transform = `translateX(100%)`;
-                    setTimeout(() => {
-                        if(type==='item') deleteItem(id); if(type==='shop') deleteShopItem(id); if(type==='pack') deletePackItem(id);
-                    }, 200);
-                } else el.style.transform = 'translateX(0)';
-            } else el.style.transform = 'translateX(0)';
-        }
-
         // Functions
-        function saveData() { localStorage.setItem('tf6_3_trips', JSON.stringify(trips)); }
+        function saveData() { localStorage.setItem('tf6_5_trips', JSON.stringify(trips)); }
         function saveConfig() { 
             config.rates.JPY = parseFloat(document.getElementById('rate-JPY').value);
             config.rates.USD = parseFloat(document.getElementById('rate-USD').value);
             config.rates.KRW = parseFloat(document.getElementById('rate-KRW').value);
             config.rates.EUR = parseFloat(document.getElementById('rate-EUR').value);
             config.rates.HKD = parseFloat(document.getElementById('rate-HKD').value);
-            localStorage.setItem('tf6_3_config', JSON.stringify(config)); 
+            localStorage.setItem('tf6_5_config', JSON.stringify(config)); 
         }
         function loadSettings() {
             document.getElementById('rate-JPY').value = config.rates.JPY;
@@ -366,6 +334,7 @@
             document.getElementById('rate-KRW').value = config.rates.KRW;
             document.getElementById('rate-EUR').value = config.rates.EUR;
             document.getElementById('rate-HKD').value = config.rates.HKD || 4.0;
+            if(document.getElementById('last-update')) document.getElementById('last-update').innerText = config.lastUpdate || '未更新';
         }
         function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
         function getTrip() { return trips.find(t => t.id === currentTripId); }
@@ -397,15 +366,15 @@
             const nowString = new Date().toLocaleString('en-US', { timeZone: tz });
             const locDate = new Date(nowString);
             const currentMins = locDate.getHours() * 60 + locDate.getMinutes();
-            const items = document.querySelectorAll('.swipe-item');
+            const items = document.querySelectorAll('.muji-card[data-time]');
             items.forEach(el => {
                 const timeStr = el.getAttribute('data-time');
                 if(timeStr) {
                     const [h, m] = timeStr.split(':').map(Number);
                     const itemMins = h * 60 + m;
-                    el.querySelector('.swipe-content').classList.remove('item-active', 'item-past');
-                    if (currentMins >= itemMins + 90) el.querySelector('.swipe-content').classList.add('item-past');
-                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.querySelector('.swipe-content').classList.add('item-active');
+                    el.classList.remove('item-active', 'item-past');
+                    if (currentMins >= itemMins + 90) el.classList.add('item-past');
+                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.classList.add('item-active');
                 }
             });
         }
@@ -426,6 +395,7 @@
                 const res = await fetch('https://open.er-api.com/v6/latest/TWD'); const data = await res.json();
                 if(data && data.rates) {
                     config.rates.JPY = 1 / data.rates.JPY; config.rates.USD = 1 / data.rates.USD; config.rates.KRW = 1 / data.rates.KRW; config.rates.EUR = 1 / data.rates.EUR; config.rates.HKD = 1 / data.rates.HKD;
+                    const d = new Date(); config.lastUpdate = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
                     saveConfig(); loadSettings(); updateCostDisplay(); if(btn) btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline"></i> Updated';
                 }
             } catch(e) { if(btn) btn.innerHTML = '<i data-lucide="x" class="w-3 h-3 inline"></i> Failed'; }
@@ -479,22 +449,35 @@
             else {
                 trip.days[activeDayIndex].items.sort((a,b) => a.time.localeCompare(b.time));
                 trip.days[activeDayIndex].items.forEach(item => {
-                    const el = document.createElement('div'); el.className = "swipe-item"; el.setAttribute('data-time', item.time);
+                    const el = document.createElement('div'); el.className = "mb-3 relative";
                     let icon='map-pin';
                     if(item.type==='flight') icon='plane'; if(item.type==='transport') icon='bus'; if(item.type==='food') icon='utensils';
                     if(item.type==='activity') icon='ticket'; if(item.type==='shopping') icon='shopping-bag'; if(item.type==='stay') icon='bed';
-                    el.innerHTML = `<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></div><div class="swipe-content p-4 shadow-sm" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'item')" onclick="openItemModal('${item.id}')"><div class="flex gap-3"><div class="flex flex-col items-center gap-1 w-10 shrink-0 pt-1"><span class="font-mono text-sm font-bold text-muji-text">${item.time}</span><i data-lucide="${icon}" class="w-4 h-4 text-gray-400"></i></div><div class="flex-1 min-w-0 border-l border-muji-border pl-3"><h4 class="font-bold text-muji-text truncate">${item.title}</h4>${item.loc ? `<div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.loc}</div>` : ''}${item.cost ? `<div class="text-xs text-muji-secondary mt-1 font-mono">${item.currency} ${item.cost}</div>` : ''}${item.note ? `<p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded">${item.note}</p>` : ''}</div></div></div>`;
+                    
+                    el.innerHTML = `
+                        <div class="timeline-line" style="left:19px;"></div>
+                        <div class="absolute left-0 top-1 w-8 h-8 flex items-center justify-center z-10 bg-muji-bg">
+                            <div class="w-8 h-8 rounded-full bg-white border border-muji-border text-gray-400 flex items-center justify-center"><i data-lucide="${icon}" class="w-4 h-4"></i></div>
+                        </div>
+                        <div class="ml-10 p-3 muji-card flex gap-3 cursor-pointer relative item-row" data-time="${item.time}" onclick="openItemModal('${item.id}')">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="font-mono text-sm font-bold text-muji-text bg-gray-100 px-1.5 rounded">${item.time}</span>
+                                    ${item.cost ? `<span class="text-xs text-muji-secondary font-mono">${item.currency} ${item.cost}</span>` : ''}
+                                </div>
+                                <h4 class="font-bold text-muji-text text-sm truncate">${item.title}</h4>
+                                ${item.loc ? `<div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.loc}</div>` : ''}
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="delete-btn"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>`;
                     listContainer.appendChild(el);
                 });
             }
-            lucide.createIcons();
+            lucide.createIcons(); updateActiveItems(trip.timezone);
         }
 
         // --- SHOPPING ---
-        function setGalleryMode(enable) {
-            galleryMode = enable;
-            renderShopping();
-        }
+        function setGalleryMode(enable) { galleryMode = enable; renderShopping(); }
         function renderShopping() {
             const trip = getTrip(); const list = document.getElementById('shopping-list'); list.innerHTML = '';
             if (trip.shopping.length === 0) { list.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-300"><i data-lucide="shopping-bag" class="w-10 h-10 mb-2 opacity-50"></i><p class="text-xs">No Purchases</p></div>`; } 
@@ -503,14 +486,22 @@
                     list.className = "scroll-area gallery-grid";
                     trip.shopping.forEach(item => {
                         const div = document.createElement('div'); div.className = "gallery-item";
-                        div.innerHTML = `<img src="${item.img || 'https://via.placeholder.com/150?text=No+Img'}" class="gallery-img"><div class="gallery-overlay"><p class="font-bold text-xs truncate">${item.name}</p><p class="text-[10px]">NT$ ${convertToTWD(item.price, item.curr)}</p></div>`;
-                        div.onclick = () => openShopModal(item.id); list.appendChild(div);
+                        div.innerHTML = `<img src="${item.img || 'https://via.placeholder.com/150?text=No+Img'}" class="gallery-img" onclick="openShopModal('${item.id}')"><div class="gallery-overlay"><p class="font-bold text-xs truncate">${item.name}</p><button onclick="event.stopPropagation(); deleteShopItem('${item.id}')" class="absolute top-1 right-1 bg-white/80 p-1 rounded-full text-red-500"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div>`;
+                        list.appendChild(div);
                     });
                 } else {
                     list.className = "scroll-area space-y-3";
                     trip.shopping.forEach(item => {
-                        const el = document.createElement('div'); el.className = "swipe-item";
-                        el.innerHTML = `<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white ml-auto"></i></div><div class="swipe-content p-3 flex gap-3 items-center" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'shop')" onclick="openShopModal('${item.id}')"><div class="w-10 h-10 bg-gray-100 rounded flex-shrink-0 overflow-hidden border border-muji-border">${item.img ? `<img src="${item.img}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-5 h-5 m-2.5 text-gray-400"></i>`}</div><div class="flex-1 min-w-0"><div class="flex justify-between"><h4 class="font-bold text-sm text-muji-text truncate">${item.name}</h4><span class="text-xs font-bold text-muji-secondary">NT$ ${convertToTWD(item.price, item.curr)}</span></div><div class="text-[10px] text-gray-400 mt-0.5">${item.loc || ''} · ${item.curr} ${item.price}</div></div></div>`;
+                        const el = document.createElement('div');
+                        el.innerHTML = `
+                        <div class="muji-card p-3 flex gap-3 items-center item-row" onclick="openShopModal('${item.id}')">
+                            <div class="w-12 h-12 bg-gray-100 rounded flex-shrink-0 overflow-hidden border border-muji-border">${item.img ? `<img src="${item.img}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-5 h-5 m-3.5 text-gray-400"></i>`}</div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-sm text-muji-text truncate">${item.name}</h4>
+                                <div class="text-xs text-muji-secondary mt-0.5">NT$ ${convertToTWD(item.price, item.curr)}</div>
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteShopItem('${item.id}')" class="delete-btn"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>`;
                         list.appendChild(el);
                     });
                 }
@@ -522,8 +513,15 @@
         function renderPacking() {
             const trip = getTrip(); const list = document.getElementById('packing-list'); list.innerHTML = '';
             trip.packing.forEach(item => {
-                const el = document.createElement('div'); el.className = "swipe-item";
-                el.innerHTML = `<div class="swipe-bg"><i data-lucide="trash-2" class="w-5 h-5 text-white ml-auto"></i></div><div class="swipe-content p-4 flex items-center gap-3 border-b border-gray-50" ontouchstart="ts(event)" ontouchmove="tm(event, this)" ontouchend="te(event, this, '${item.id}', 'pack')"><div onclick="togglePack('${item.id}')" class="w-5 h-5 rounded border ${item.checked ? 'bg-muji-primary border-muji-primary' : 'border-gray-300'} flex items-center justify-center text-white transition">${item.checked ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}</div><span class="${item.checked ? 'text-gray-300 line-through' : 'text-muji-text text-sm font-medium'}">${item.text}</span></div>`;
+                const el = document.createElement('div');
+                el.innerHTML = `
+                <div class="muji-card p-3 flex items-center justify-between mb-2 item-row">
+                    <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="togglePack('${item.id}')">
+                        <div class="w-5 h-5 rounded border ${item.checked ? 'bg-muji-primary border-muji-primary' : 'border-gray-300'} flex items-center justify-center text-white transition">${item.checked ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}</div>
+                        <span class="${item.checked ? 'text-gray-300 line-through' : 'text-muji-text text-sm font-medium'}">${item.text}</span>
+                    </div>
+                    <button onclick="deletePackItem('${item.id}')" class="delete-btn"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`;
                 list.appendChild(el);
             });
             lucide.createIcons();
@@ -569,7 +567,7 @@
             saveData(); document.getElementById('modal-trip').classList.add('hidden');
             if(currentTripId) renderDetail(); else renderHome();
         }
-        function deleteTrip(id) { if(confirm('確定要刪除此旅行嗎？')) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); } }
+        function deleteTrip(id) { if(confirm('Delete?')) { trips = trips.filter(t => t.id !== id); saveData(); renderHome(); } }
 
         function openItemModal(id = null) {
             editingItemId = id; document.getElementById('modal-item').classList.remove('hidden');
@@ -592,7 +590,7 @@
             trip.days[dayIdx].items.push(newItem);
             saveData(); document.getElementById('modal-item').classList.add('hidden'); renderItinerary(); renderDetail();
         }
-        function deleteItem(id) { const trip = getTrip(); trip.days[activeDayIndex].items = trip.days[activeDayIndex].items.filter(i => i.id !== id); saveData(); renderItinerary(); renderDetail(); }
+        function deleteItem(id) { if(confirm('Delete?')){ const trip = getTrip(); trip.days[activeDayIndex].items = trip.days[activeDayIndex].items.filter(i => i.id !== id); saveData(); renderItinerary(); renderDetail(); }}
         function modDays(d) { const trip = getTrip(); trip.days.push({items:[]}); saveData(); renderItinerary(); }
         function deleteCurrentDay() { const trip = getTrip(); if(trip.days.length>1 && confirm('Delete Day?')){ trip.days.splice(activeDayIndex,1); if(activeDayIndex>=trip.days.length) activeDayIndex=trip.days.length-1; saveData(); renderItinerary(); }}
 
@@ -616,12 +614,12 @@
             if(editingShopId) { const idx = trip.shopping.findIndex(i => i.id === editingShopId); trip.shopping[idx] = newItem; } else { trip.shopping.push(newItem); }
             saveData(); document.getElementById('modal-shop').classList.add('hidden'); renderShopping(); renderDetail();
         }
-        function deleteShopItem(id) { const trip = getTrip(); trip.shopping = trip.shopping.filter(i => i.id !== id); saveData(); renderShopping(); renderDetail(); }
+        function deleteShopItem(id) { if(confirm('Delete?')){ const trip = getTrip(); trip.shopping = trip.shopping.filter(i => i.id !== id); saveData(); renderShopping(); renderDetail(); }}
 
         function savePack() {
             const name = document.getElementById('pack-name').value; if(name) { const trip = getTrip(); trip.packing.push({ id: genId(), text: name, checked: false }); saveData(); renderPacking(); renderDetail(); document.getElementById('modal-pack').classList.add('hidden'); document.getElementById('pack-name').value = ''; }
         }
-        function deletePackItem(id) { const trip = getTrip(); trip.packing = trip.packing.filter(i => i.id !== id); saveData(); renderPacking(); renderDetail(); }
+        function deletePackItem(id) { if(confirm('Delete?')){ const trip = getTrip(); trip.packing = trip.packing.filter(i => i.id !== id); saveData(); renderPacking(); renderDetail(); }}
 
         function exportAll() {
             const trip = getTrip(); const c = document.getElementById('export-container');

@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, black-translucent, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TravelFlow 6.6</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -677,8 +677,5 @@
             trips.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(trip=>{const el=document.createElement('div');el.className='mb-3 relative';const dayCount=trip.days.length;const totalCost=calculateTotalCost(trip);el.innerHTML=`<div class="p-4 muji-card flex justify-between items-center cursor-pointer" onclick="openTrip('${trip.id}')"><div class="flex-1"><h3 class="font-serif font-bold text-lg text-muji-text">${trip.title}</h3><p class="text-xs text-muji-secondary mt-1">${dayCount} Days · NT$ ${totalCost.toLocaleString()}</p></div><button onclick="event.stopPropagation(); deleteTrip('${trip.id}')" class="p-2 text-gray-300 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`;container.appendChild(el)});lucide.createIcons()
         }
     </script>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 </body>
 </html>

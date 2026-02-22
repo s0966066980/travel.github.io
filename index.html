@@ -316,9 +316,6 @@
             fetchRates(); // Auto fetch on load
             updateClocks();
             clockInterval = setInterval(updateClocks, 1000);
-            document.addEventListener('touchstart', handleTouchStart, false);
-            document.addEventListener('touchmove', handleTouchMove, false);
-            document.addEventListener('touchend', handleTouchEnd, false);
         });
 
         // Functions
@@ -353,6 +350,15 @@
             return 'Asia/Taipei';
         }
 
+        // --- Date Helper for Displaying MM/DD ---
+        function getShortDate(dateStr, addDays) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '';
+            date.setDate(date.getDate() + addDays);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+
         function updateClocks() {
             const now = new Date();
             document.getElementById('clock-tw').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -369,15 +375,15 @@
             const nowString = new Date().toLocaleString('en-US', { timeZone: tz });
             const locDate = new Date(nowString);
             const currentMins = locDate.getHours() * 60 + locDate.getMinutes();
-            const items = document.querySelectorAll('.swipe-item');
+            const items = document.querySelectorAll('.muji-card[data-time]');
             items.forEach(el => {
                 const timeStr = el.getAttribute('data-time');
                 if(timeStr) {
                     const [h, m] = timeStr.split(':').map(Number);
                     const itemMins = h * 60 + m;
-                    el.querySelector('.swipe-content').classList.remove('item-active', 'item-past');
-                    if (currentMins >= itemMins + 90) el.querySelector('.swipe-content').classList.add('item-past');
-                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.querySelector('.swipe-content').classList.add('item-active');
+                    el.classList.remove('item-active', 'item-past');
+                    if (currentMins >= itemMins + 90) el.classList.add('item-past');
+                    else if (currentMins >= itemMins && currentMins < itemMins + 90) el.classList.add('item-active');
                 }
             });
         }
@@ -397,7 +403,6 @@
             try { 
                 const res = await fetch('https://open.er-api.com/v6/latest/TWD'); const data = await res.json();
                 if(data && data.rates) {
-                    // Correct Fix: Update Config Object -> Save to LocalStorage -> Update UI
                     config.rates.JPY = 1 / data.rates.JPY; 
                     config.rates.USD = 1 / data.rates.USD; 
                     config.rates.KRW = 1 / data.rates.KRW; 
@@ -406,10 +411,7 @@
                     const d = new Date(); 
                     config.lastUpdate = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
                     
-                    // SAVE DIRECTLY TO STORAGE (BYPASS READ FROM INPUTS)
                     localStorage.setItem('tf6_6_config', JSON.stringify(config));
-                    
-                    // THEN UPDATE UI
                     loadSettings(); 
                     updateCostDisplay(); 
                     
@@ -461,7 +463,9 @@
             let daysHtml = '';
             trip.days.forEach((d, idx) => {
                 const activeClass = idx === activeDayIndex ? 'bg-white text-muji-text border-muji-border' : 'bg-transparent text-gray-400 border-transparent';
-                daysHtml += `<button onclick="activeDayIndex=${idx}; renderItinerary()" class="shrink-0 px-4 py-1.5 rounded text-sm font-bold border transition ${activeClass}">Day ${idx+1}</button>`;
+                const shortDate = getShortDate(trip.startDate, idx);
+                const displayDate = shortDate ? `<span class="text-[10px] opacity-80 font-normal ml-1">(${shortDate})</span>` : '';
+                daysHtml += `<button onclick="activeDayIndex=${idx}; renderItinerary()" class="shrink-0 px-4 py-1.5 rounded text-sm font-bold border transition flex items-center ${activeClass}">Day ${idx+1} ${displayDate}</button>`;
             });
             dayContainer.innerHTML = daysHtml;
             listContainer.innerHTML = '';
@@ -592,7 +596,11 @@
         function openItemModal(id = null) {
             editingItemId = id; document.getElementById('modal-item').classList.remove('hidden');
             const trip = getTrip();
-            document.getElementById('item-day').innerHTML = trip.days.map((_, i) => `<option value="${i}">Day ${i+1}</option>`).join('');
+            document.getElementById('item-day').innerHTML = trip.days.map((_, i) => {
+                const shortDate = getShortDate(trip.startDate, i);
+                const dateDisplay = shortDate ? ` (${shortDate})` : '';
+                return `<option value="${i}">Day ${i+1}${dateDisplay}</option>`;
+            }).join('');
             document.getElementById('item-day').value = activeDayIndex;
             if(id) {
                 const item = trip.days[activeDayIndex].items.find(i => i.id === id);
@@ -644,31 +652,17 @@
         function exportAll() {
             const trip = getTrip(); const c = document.getElementById('export-container');
             c.innerHTML = `<h1 class="text-3xl font-bold text-gray-700 mb-4 font-serif">${trip.title}</h1>`;
-            trip.days.forEach((d,i) => { c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Day ${i+1}</h3>`; d.items.forEach(item => c.innerHTML += `<div class="pl-4 mb-1 border-b border-gray-50 pb-1"><b>${item.time}</b> ${item.title}</div>`); });
+            trip.days.forEach((d,i) => { 
+                const shortDate = getShortDate(trip.startDate, i);
+                const dateDisplay = shortDate ? ` (${shortDate})` : '';
+                c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Day ${i+1}${dateDisplay}</h3>`; 
+                d.items.forEach(item => c.innerHTML += `<div class="pl-4 mb-1 border-b border-gray-50 pb-1"><b>${item.time}</b> ${item.title}</div>`); 
+            });
             c.innerHTML += `<h3 class="bg-gray-100 p-2 font-bold mt-4 mb-2 text-gray-600">Shopping</h3>`; trip.shopping.forEach(s => c.innerHTML += `<div class="pl-4 mb-1">${s.name} - ${s.curr} ${s.price}</div>`);
             c.style.zIndex = 100; c.style.top = '0';
             html2canvas(c).then(canvas => { const link = document.createElement('a'); link.download = 'TravelFlow_Plan.jpg'; link.href = canvas.toDataURL(); link.click(); c.style.top = '-9999px'; c.style.zIndex = -5; });
         }
 
-        // Swipe (Removed, keeping clean handlers)
-        let tStartX=0, tCurrX=0, isSwiping=false;
-        function handleTouchStart(e) { tStartX = e.touches[0].clientX; } 
-        function handleTouchMove(e) {
-            tCurrX = e.touches[0].clientX; const diff = tCurrX - tStartX;
-            if(diff > 0 && diff < 150) { 
-                e.preventDefault(); 
-                const el = e.target.closest('.swipe-content');
-                if(el) { el.style.transition = 'none'; el.style.transform = `translateX(${diff}px)`; }
-            }
-        }
-        function handleTouchEnd(e) {
-             const diff = tCurrX - tStartX;
-             const el = e.target.closest('.swipe-content');
-             if(!el) return;
-             el.style.transition = 'transform 0.2s';
-             el.style.transform = 'translateX(0)';
-        }
-        
         function renderHome(){
             const container=document.getElementById('trip-list');
             if(!container) return;
